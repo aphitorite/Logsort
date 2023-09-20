@@ -27,10 +27,6 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#define CACHE_SIZE 32
-#define VAR int
-#define CMP(a,b) (*(a) - *(b))
-
 char ceilLog(size_t n) {
 	char r = 0;
 	while((1 << r) < n) r++;
@@ -121,20 +117,6 @@ VAR smartMedian(VAR *a, VAR *s, size_t n, size_t bLen) {
 //           //
 ///////////////
 
-char pivLess(VAR *a, VAR *piv) {
-	return CMP(a, piv) < 0;
-}
-char pivLessEq(VAR *a, VAR *piv) {
-	return CMP(a, piv) <= 0;
-}
-
-size_t blockRead(VAR *a, VAR *piv, char wLen, char (*pivCmp)(VAR*, VAR*)) {
-	size_t r = 0, i = 0;
-	
-	while(wLen--) r |= pivCmp(a++, piv) << (i++);
-	
-	return r;
-}
 void blockXor(VAR *a, VAR *b, size_t v) {
 	VAR t;
 	
@@ -144,127 +126,44 @@ void blockXor(VAR *a, VAR *b, size_t v) {
 	}
 }
 
-VAR *partitionEasy(VAR *a, VAR *s, size_t n, VAR *piv, char (*pivCmp)(VAR*, VAR*)) {
-	VAR *pa = a, *ps = s;
-	
-	for(size_t i = 0; i < n; i++) {
-		if(pivCmp(pa, piv)) *(a++)  = *(pa++);
-		else                *(ps++) = *(pa++);
-	}
-	memcpy(a, s, (ps-s) * sizeof(VAR));
-	
-	return a;
-}
-VAR *partition(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv, char (*pivCmp)(VAR*, VAR*)) {
-	if(n <= bLen) return partitionEasy(a, s, n, piv, pivCmp);
-	
-	//group into blocks
-	
-	VAR *p = a;
-	size_t i, l = 0, r = 0, lb = 0, rb = 0;
-	
-	for(i = 0; i < n; i++) {
-		if(pivCmp(a+i, piv)) p[l++] = a[i];
-		else                 s[r++] = a[i];
-		
-		if(l == bLen) { 
-			p += bLen; l = 0; lb++; 
-		}
-		if(r == bLen) {
-			memcpy(p+bLen, p, l * sizeof(VAR));
-			memcpy(p, s, bLen * sizeof(VAR));
-			
-			p += bLen; r = 0; rb++;
-		}
-	}
-	memcpy(p+l, s, r * sizeof(VAR));
-	
-	char left = lb < rb;
-	size_t min = left ? lb : rb;
-	VAR *m = a + lb*bLen;
-	
-	if(min) {
-		size_t max = lb+rb - min, v = 0;
-		char wLen = ceilLog(min);
-		
-		//encode bits in blocks
-		
-		VAR *pa = a, *pb = a;
-		
-		for(i = 0; i < min; i++) {
-			while(!pivCmp(pa+wLen, piv)) pa += bLen;
-			while( pivCmp(pb+wLen, piv)) pb += bLen;
-			
-			blockXor(pa, pb, v++); 
-			pa += bLen; pb += bLen;
-		}
-		
-		//swap blocks of larger partition
-		
-		pa = left ? p-bLen : a; pb = pa;
-		size_t step = left ? -bLen : bLen;
-		
-		for(i = 0; i < max; ) {
-			if(left ^ pivCmp(pb+wLen, piv)) {
-				memcpy(s,  pa, bLen * sizeof(VAR));
-				memcpy(pa, pb, bLen * sizeof(VAR));
-				memcpy(pb, s,  bLen * sizeof(VAR));
-				
-				pa += step; i++;
-			}
-			pb += step;
-		}
-		
-		//block cycle sort
-		
-		size_t j = 0, k, mask = (left << wLen) - left;
-		VAR *ps = left ? a : m; pa = ps; pb = left ? m : a;
-		
-		for(i = 0; i < min; i++) {
-			k = mask ^ blockRead(pa, piv, wLen, pivCmp);
-			
-			while(j != k) {
-				memcpy(s,  pa,          bLen * sizeof(VAR));
-				memcpy(pa, ps + k*bLen, bLen * sizeof(VAR));
-				memcpy(ps + k*bLen,  s, bLen * sizeof(VAR));
-				
-				k = mask ^ blockRead(pa, piv, wLen, pivCmp);
-			}
-			blockXor(pa, pb, j++);
-			pa += bLen; pb += bLen;
-		}
-	}
-	
-	//clean up leftovers
-	
-	memcpy(s, p, l * sizeof(VAR));
-	memmove(m+l, m, rb*bLen * sizeof(VAR));
-	memcpy(m, s, l * sizeof(VAR));
-	
-	return m+l;
-}
+#define PIVFUNC(NAME) NAME##Less
+#define PIVCMP(a, b) (CMP((a), (b)) < 0)
+
+#include "logPartition.c"
+
+#undef PIVFUNC
+#undef PIVCMP
+
+#define PIVFUNC(NAME) NAME##LessEq
+#define PIVCMP(a, b) (CMP((a), (b)) <= 0)
+
+#include "logPartition.c"
+
+#undef PIVFUNC
+#undef PIVCMP
 
 void logSortMain(VAR *a, VAR *s, size_t n, size_t bLen) {
 	while(n > 24) {
 		VAR piv = n < 2048 ? medianOfNine(a, s, n)
 		                   : smartMedian(a, s, n, bLen);
 		
-		VAR *p = partition(a, s, n, bLen, &piv, pivLessEq);
+		VAR *p = partitionLessEq(a, s, n, bLen, &piv);
+		size_t m = p-a;
 		
-		if(p-a == n) {
-			p = partition(a, s, n, bLen, &piv, pivLess);
-			n = p-a;
+		if(m == n) {
+			p = partitionLess(a, s, n, bLen, &piv);
+			n = m;
 			
 			continue;
 		}
-		logSortMain(p, s, n - (p-a), bLen);
-		n = p-a;
+		logSortMain(p, s, n-m, bLen);
+		n = m;
 	}
 	smallSort(a, n);
 }
-void logSort(VAR *a, size_t n) {
-	size_t bLen = n < CACHE_SIZE ? n : CACHE_SIZE;
-	if(bLen < 9) bLen = 9;
+void logSort(VAR *a, size_t n, size_t bLen) {
+	if(n < bLen) bLen = n;
+	if(bLen < 9) bLen = 9; //for median of nine
 	
 	VAR *s = malloc(bLen * sizeof(VAR));
 	logSortMain(a, s, n, bLen);
