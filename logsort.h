@@ -33,17 +33,17 @@ char ceilLog(size_t n) {
 	return r;
 }
 
-void smallSort(VAR *a, size_t n) {
-	VAR t, *pa = a+n-1, *pb = pa+1;
+void smallSort(VAR *a, size_t n) { //unguarded insertion
+	VAR t, *pb = a+n, *pa = pb-1;
 	size_t i;
 	
-	for(i = 0; i < n-1; i++) 
+	for(i = 1; i < n; i++) 
 		if(CMP(--pa, --pb) > 0) { t = *pa; *pa = *pb; *pb = t; }
 	
 	for(i = 1; i < n; i++) {
-		pa = pb = a+i;
+		pb = a+i; pa = pb-1;
 		
-		if(CMP(--pa, pb) > 0) {
+		if(CMP(pa, pb) > 0) {
 			t = *pb;
 			do { *(pb--) = *(pa--); } while(CMP(pa, &t) > 0);
 			*pb = t;
@@ -152,7 +152,7 @@ void logSortMain(VAR *a, VAR *s, size_t n, size_t bLen) {
 		
 		if(m == n) {
 			p = partitionLess(a, s, n, bLen, &piv);
-			n = m;
+			n = p-a;
 			
 			continue;
 		}
