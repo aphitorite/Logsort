@@ -34,10 +34,12 @@ size_t PIVFUNC(blockRead)(VAR *a, VAR *piv, char wLen) {
 
 VAR *PIVFUNC(partitionEasy)(VAR *a, VAR *s, size_t n, VAR *piv) {
 	VAR *pa = a, *ps = s;
+	char x;
 	
 	for(size_t i = 0; i < n; i++) {
-		if(PIVCMP(pa, piv)) *(a++)  = *(pa++);
-		else                *(ps++) = *(pa++);
+		x = PIVCMP(pa, piv);
+		
+		*a = *pa; *ps = *pa; pa++; a += x; ps += !x;
 	}
 	memcpy(a, s, (ps-s) * sizeof(VAR));
 	
@@ -50,10 +52,12 @@ VAR *PIVFUNC(partition)(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv) {
 	
 	VAR *p = a;
 	size_t i, l = 0, r = 0, lb = 0, rb = 0;
+	char x;
 	
 	for(i = 0; i < n; i++) {
-		if(PIVCMP(a+i, piv)) p[l++] = a[i];
-		else                 s[r++] = a[i];
+		x = PIVCMP(a+i, piv);
+		
+		p[l] = a[i]; s[r] = a[i]; l += x; r += !x;
 		
 		if(l == bLen) { 
 			p += bLen; l = 0; lb++; 
