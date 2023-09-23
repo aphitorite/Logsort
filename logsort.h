@@ -27,7 +27,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#define MIN_INSERT 32
+#define MIN_INSERT 64
 
 char ceilLog(size_t n) {
 	char r = 0;
