@@ -27,7 +27,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#define MIN_INSERT 64
+#define MIN_INSERT 32
 
 char ceilLog(size_t n) {
 	char r = 0;
@@ -89,7 +89,7 @@ void quickSelect(VAR *a, size_t n, size_t p) {
 		i = a; j++;
 		
 		while(1) {
-			while(++i <  j && CMP(i, a) < 0);
+			while(++i <  j && CMP(a, i) > 0);
 			while(--j >= i && CMP(j, a) > 0);
 			
 			if(i < j) { t = *i; *i = *j; *j = t; }
@@ -145,7 +145,7 @@ void blockXor(VAR *a, VAR *b, size_t v) {
 }
 
 #define PIVFUNC(NAME) NAME##Less
-#define PIVCMP(a, b) (CMP((a), (b)) < 0)
+#define PIVCMP(a, b) (CMP((b), (a)) > 0)
 
 #include "logPartition.c"
 
