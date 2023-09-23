@@ -262,7 +262,7 @@ The theory behind Logsort is nice, but how does it compare against existing sort
 - [**Sqrtsort**](https://github.com/Mrrl/SqrtSort) +SqrtN aux (Block Merge Sort)
 - [**Blitsort**](https://github.com/scandum/blitsort) +512 aux (Fast Rotate Merge/Quick Sort, O(n log² n))
 
-All sorts are compiled using `gcc -O3` and sorting a random linear distribution of 32-bit integers containing N unique, Sqrt(N) unique, and 4 unique values respectively.
+All sorts are compiled using `gcc -O3` and sorting a random linear distribution of 32-bit integers containing N unique, Sqrt(N) unique, and 4 unique values respectively.  The average time among 100 trials is recorded.
 
 ![2^14](https://github.com/aphitorite/Logsort/blob/main/graphs/exp14.png)
 ![2^20](https://github.com/aphitorite/Logsort/blob/main/graphs/exp20.png)
