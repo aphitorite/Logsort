@@ -17,17 +17,18 @@ Logsort is a new sorting algorithm that aims to provide a simple and practical O
 Partitioning is analogous to sorting an array of 0's and 1's, where elements smaller than the pivot are 0 and elements larger are 1.  Logsort sorts 0's and 1's stably in O(n) time and O(log n) space via its partition.
 
 The partitioning algorithm is divided into four phases:
-1. Grouping elements into blocks
-2. Bit encoding the blocks
-3. Swapping the blocks
-4. Sorting the blocks (+ cleanup)
+1. [Grouping elements into blocks](https://github.com/aphitorite/Logsort#grouping-phase)
+2. [Bit encoding the blocks](https://github.com/aphitorite/Logsort#bit-encoding)
+3. [Swapping the blocks](https://github.com/aphitorite/Logsort#swapping-the-blocks)
+4. [Sorting the blocks](https://github.com/aphitorite/Logsort#sorting-the-blocks) (+ [cleanup](https://github.com/aphitorite/Logsort#cleaning-up))
 
-### Grouping phase
+## Grouping phase
 
 Given an unordered list of 0's and 1's, we group them into blocks of a fixed size where each block contains either only 0's or 1's.  Given two buckets of B extra space, one can easily group blocks of size B:
 
 ```
-B = 2
+Grouping blocks of size 2:
+
         ↓ move to ones bucket
 array: [1, 0, 1, 1, 0, 0, 1, 1]
 zeros: [ ,  ]
@@ -78,7 +79,7 @@ In the actual implementation, Logsort uses a space optimization from Aeos Quicks
 
 > Since each element is moved twice, once to the bucket and once back to the array, the grouping phase is O(n) regardless of block size but requires O(block size) extra space.
 
-### Bit encoding
+## Bit encoding
 
 0's and 1's can also be concatenated to make binary numbers.  Since Logsort's blocks are O(log n) in size, we can encode numbers, with a range of O(n), in blocks by swapping elements between 0 blocks and 1 blocks.  Decoding a number in a block requires a scan of the block which costs O(log n) comparisons.
 
@@ -118,7 +119,7 @@ In this example, there were fewer 0 blocks, so all 0 blocks get encoded leaving 
 
 > Encoding an index costs O(log n) swaps.  Since each block is size O(log n), there are O(n/log n) blocks, so this phase is O(n/log n) \* O(log n) = O(n).
 
-### Swapping the blocks
+## Swapping the blocks
 
 Once the blocks are encoded, we swap the blocks belonging to the larger partition.  In our example, there are more 1 blocks than 0 blocks so we swap the 1 blocks to the right into their correct place:
 
@@ -148,7 +149,7 @@ Swapping blocks in this fashion preserves the order of the 1 blocks.  If there w
 
 > Each block in the phase is swapped once.  Since each block swap costs O(log n) swaps and there are at most O(n/log n) blocks swapped, the swapping phase is O(n/log n) \* O(log n) = O(n).
 
-### Sorting the blocks
+## Sorting the blocks
 
 Reordering the scrambled blocks is quite easy: simply iterate across the blocks.  If the current block's index is not equal to the iterator, block swap the current block to the read index.  Repeat this step until the current block's index matches the iterator and move on to the next block.
 
@@ -289,4 +290,4 @@ The author would like to thank members of the Discord server "The Studio" ([http
 - **@anonymous0726** for providing Aeos Quicksort as a reference
 -  **!- DISTRAY -!#9097** for revising the block encoding algorithm
 -  **@control._.** for answering questions regarding practical performance
-- **@scandum** for providing lots of useful C code as reference as well as answering questions
+- **@scandum** ([github](https://github.com/scandum)) for providing lots of useful C code as reference as well as answering questions
