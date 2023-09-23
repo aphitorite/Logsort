@@ -1,7 +1,7 @@
 
 ## Introduction
 
-Logsort is a novel practical in-place stable O(n log n) quicksort.  The algorithm uses O(log n) space, hence the name, which many consider to be in-place despite not being the optimal O(1).  Unlike well-known in-place stable sorts which are O(n log² n), Logsort is asymptotically optimal.
+Logsort is a novel practical in-place stable O(n log n) quicksort.  The algorithm uses O(log n) space, hence the name, which many consider to be in-place despite not being the optimal O(1).  Unlike well-known in-place stable sorts, such as std::stable_sort, which are O(n log² n), Logsort is asymptotically optimal.
 
 To see Logsort's practical performance, see [Results](https://github.com/aphitorite/Logsort#Results).
 
