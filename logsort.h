@@ -35,6 +35,7 @@ char ceilLog(size_t n) {
 	return r;
 }
 
+//fully unguarded insertion (assumes a[-1] is <= a[0] to a[n-1])
 void unguardedInsert(VAR *a, size_t n) {
 	VAR t, *pb, *pa;
 	size_t i;
@@ -54,10 +55,10 @@ void smallSort(VAR *a, size_t n) {
 	VAR t, *pb = a+n, *pa = pb-1;
 	size_t i;
 	
-	for(i = 1; i < n; i++) 
+	for(i = 1; i < n; i++)   //bubble smallest element to front
 		if(CMP(--pa, --pb) > 0) { t = *pa; *pa = *pb; *pb = t; }
 	
-	for(i = 1; i < n; i++) {
+	for(i = 1; i < n; i++) { //perform unguarded insertion
 		pb = a+i; pa = pb-1;
 		
 		if(CMP(pa, pb) <= 0) continue;
@@ -159,6 +160,7 @@ void blockXor(VAR *a, VAR *b, size_t v) {
 #undef PIVFUNC
 #undef PIVCMP
 
+//not a full sort: use logSortMain() instead
 void logSortUnguarded(VAR *a, VAR *s, size_t n, size_t bLen) {
 	while(n > MIN_INSERT) {
 		VAR piv = n < 2048 ? medianOfNine(a, s, n)
