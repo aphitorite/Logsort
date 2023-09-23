@@ -1,8 +1,11 @@
-﻿## Introduction
+
+## Introduction
 
 Logsort is a novel practical in-place stable O(n log n) quicksort.  The algorithm uses O(log n) space, hence the name, which many consider to be in-place despite not being the optimal O(1).  Unlike well-known in-place stable sorts which are O(n log² n), Logsort is asymptotically optimal.
 
 To see Logsort's practical performance, see [Results](https://github.com/aphitorite/Logsort#Results).
+
+**Usage:** define `VAR` type and `CMP` comparison function.
 
 ## Motivation
 
@@ -73,15 +76,17 @@ array: [1, 1, 0, 0, 1, 1, 0, 1]
        [1, 1][0, 0][1, 1][0][1]
 ```
 
-Logsort's O(log n) space usage comes from grouping blocks of size O(log n), we'll see why this is important later.
+At the end of the phase, we are left with some leftover zeros that don't make a complete block.  We handle them in the very last step of the partition.
 
-In the actual implementation, Logsort uses a space optimization from Aeos Quicksort which only needs one bucket instead of two.  Like Wikisort and Grailsort, Logsort's external buffer size can be configured, given it's at least Ω(log n).
+Logsort's O(log n) space usage comes from grouping blocks of size O(log n), and this will be important in the encoding phase.  In the actual implementation, Logsort uses a space optimization from Aeos Quicksort which only needs one bucket instead of two.  Like Wikisort and Grailsort, Logsort's external buffer size can be configured, given it's at least Ω(log n).
 
 > Since each element is moved twice, once to the bucket and once back to the array, the grouping phase is O(n) regardless of block size but requires O(block size) extra space.
 
 ## Bit encoding
 
-0's and 1's can also be concatenated to make binary numbers.  Since Logsort's blocks are O(log n) in size, we can encode numbers, with a range of O(n), in blocks by swapping elements between 0 blocks and 1 blocks.  Decoding a number in a block requires a scan of the block which costs O(log n) comparisons.
+0's and 1's can also be concatenated to make binary numbers, so we can encode numbers in blocks by swapping elements between 0 blocks and 1 blocks.  Decoding a number in a block requires a scan of the block which costs O(log n) comparisons.  Since Logsort's blocks are O(log n) in size, there are enough bits to assign a unique index to each block.
+
+> There are at most O(n/log n) encodable blocks which requires O(log n) bits to represent a number range from 0 to O(n/log n).
 
 ```
 Encode 11 = 0b1101:
@@ -121,7 +126,7 @@ In this example, there were fewer 0 blocks, so all 0 blocks get encoded leaving 
 
 ## Swapping the blocks
 
-Once the blocks are encoded, we swap the blocks belonging to the larger partition.  In our example, there are more 1 blocks than 0 blocks so we swap the 1 blocks to the right into their correct place:
+Once the blocks are encoded, we swap the blocks belonging to the larger partition.  In our example, there are more 1 blocks than 0 blocks so we scan the blocks' reserved bit and swap the 1 blocks to the right into their correct place:
 
 ```
  (0)   (0)   (1)   (2)   (1)         (2)
@@ -205,7 +210,7 @@ for each index from 0 to blocks.count - 1:
 
 ### Cleaning up
 
-After the sorting phase, the blocks are now partitioned stably in O(n) time.  Since they are in order, we can easily "uncode" them, by encoding them with the same index, to complete the partition on the blocks.
+After the sorting phase, the blocks are now partitioned stably in O(n) time.  However, some elements between blocks are still swapped from the encoding phase, and we want to restore the original states of the blocks.  Since they are in order, we can easily "uncode" them, by encoding them with the same index, to complete the partition on the blocks.
 
 ```
 Uncode blocks:
@@ -228,7 +233,7 @@ Uncode blocks:
 blocks and underlying elements partitioned stably!
 ```
 
-We are not done yet, however, and still have a leftover chunk of 0's from the grouping phase.  Simply copy the 0 leftovers, shift the 1's partition to the right, and copy the leftovers back:
+We are not done yet and still have a leftover chunk of 0's from the grouping phase.  Simply copy the 0 leftovers, shift the 1's partition to the right, and copy the leftovers back:
 
 ```
 Clean up:
@@ -256,7 +261,7 @@ Finally, we've stably partitioned the list in O(n) time and O(log n) space.
 
 ## Results
 
-The theory behind Logsort is nice, but how does it compare against existing sorts?  In the following benchmarks, we test Logsort's practicality against four other stable sorting algorithms:
+An O(n log n) in-place stable sort in theory sounds great, but how does it compare against existing sorts?  In the following benchmarks, we test Logsort's practicality against four other stable sorting algorithms:
 
 - [**Grailsort**](https://github.com/Mrrl/GrailSort) +512 aux (Block Merge Sort)
 - [**Octosort**](https://github.com/scandum/octosort) +512 aux (Block Merge Sort, optimized [Wikisort](https://github.com/BonzaiThePenguin/WikiSort))
@@ -271,23 +276,23 @@ All sorts are compiled using `gcc -O3` and sorting a random linear distribution 
 
 ## Concluding remarks
 
-Grailsort, Octosort, and Sqrtsort used branched comparisons in merging.  Logsort was optimized with branchless comparisons similar to [Fluxsort](https://github.com/scandum/fluxsort/) which greatly improved its performance (40% increase in speed!)
+Grailsort, Octosort, and Sqrtsort used branched comparisons in merging.  Logsort was optimized with branchless comparisons similar to [Fluxsort](https://github.com/scandum/fluxsort/) which greatly improved its performance. (40% increase in speed!)
 
 Unlike Block Merge Sorts, Logsort relies on its bit encoding to store information rather than distinct values.  This avoids any overhead in a key collection algorithm; we see this happening with Grailsort on SqrtN uniques.
 
-Being a stable quicksort, Logsort naturally performs well on data with few uniques boasting a O(n log u) complexity.  However, Octosort and Blitsort beat Logsort on n = 16M + 4 uniques despite having a complexity of O(n log n log u).  This is likely due to Logsort's poorer locality on larger list sizes compared to simple merges with rotations.
+Being a stable quicksort, Logsort naturally performs well on data with few uniques boasting a O(n log u) complexity.  However, Octosort and Blitsort beat Logsort on n = 16M with 4 uniques despite having a complexity of O(n log n log u).  This is likely due to Logsort's poorer access patterns compared to that of simple merges with rotations.
 
-Logsort's main rival, Blitsort, is an optimized Rotate Merge/Quick Sort which uses rotations to merge/partition but has a suboptimal O(n log² n) complexity.  Despite this, Rotate Merge is known to beat the optimal Block Merge owing to its simplicity and locality.  
+Logsort's main rival, Blitsort, is an optimized Rotate Merge/Quick Sort which uses rotations to merge/partition but has a suboptimal O(n log² n) complexity.  Despite this, Rotate Merge is known to beat the optimal Block Merge owing to its simplicity, good locality, and low overhead.
 
-In the benchmarks, Logsort remained competitive with Blitsort on n = 16k and 1M and even beat Blitsort on n = 16M with its superior time complexity.  Unlike Blitsort, however, Logsort is not designed to be an adaptive sort, and this comparison is only on random data.
+In the benchmarks, Logsort remained competitive with Blitsort on 16k and 1M integers and even beat Blitsort on 16M integers with its superior time complexity.  Unlike Blitsort, however, Logsort is not optimized to be an adaptive sort, and this comparison is only on random data.
 
-With further improvements, such as a hybrid between a rotate partition and blocked partition, it's likely that stable O(n log n) in-place sorting has practical application outside theory.  It's worth noting that Logsort's application is quite galactic, only seeing benefits on lengths in the tens of millions.  However, despite Logsort's simplicity compared to Block Merge Sorts, these algorithms remain fairly complicated compared to their unstable counterparts.  
+With further improvements, such as a hybrid between a rotate partition and blocked partition, it's likely that stable O(n log n) in-place sorting has practical application outside of theory.  It's worth noting that Logsort's application is quite galactic, only seeing benefits on lengths in the tens of millions.  However, despite Logsort's simplicity compared to Block Merge Sorts, these algorithms remain fairly complicated compared to their unstable counterparts.  
 
 ## Acknowledgements
 
 The author would like to thank members of the Discord server "The Studio" ([https://discord.gg/thestudio](https://discord.gg/thestudio "https://discord.gg/thestudio")) particularly:
 
 - **@anonymous0726** for providing Aeos Quicksort as a reference
--  **!- DISTRAY -!#9097** for revising the block encoding algorithm
--  **@control._.** for answering questions regarding practical performance
+- **!- DISTRAY -!#9097** for revising the block encoding algorithm
+- **@control._.** for answering questions regarding practical performance
 - **@scandum** ([github](https://github.com/scandum)) for providing lots of useful C code as reference as well as answering questions
