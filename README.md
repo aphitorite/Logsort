@@ -11,9 +11,9 @@ To see Logsort's practical performance, jump to [Results](https://github.com/aph
 
 O(n log n) in-place stable sorting is a hard task to achieve for sorting algorithms.  Bubble Sort and Insertion Sort are stable and in-place but suboptimal.  Efficient sorts, such as Quicksort and Heapsort, are in-place and O(n log n) but unstable.  
 
-One class of sorting algorithms that achieve both in-place, stability, and O(n log n) time is Block Sort (a.k.a. Block Merge Sorts), such as [Wikisort](https://github.com/BonzaiThePenguin/WikiSort) and [Grailsort](https://github.com/Mrrl/GrailSort), which are in-place merge sorts.  However, they are incredibly complicated and hard to implement.  In addition, in-place stable partitioning is a rather obscure problem in sorting.  The papers that do provide solutions describe partitioning algorithms that are only of theoretical interest.
+One class of sorting algorithms that achieve both in-place, stability, and O(n log n) time is Block Sort (a.k.a. Block Merge Sorts), such as [Wikisort](https://github.com/BonzaiThePenguin/WikiSort) and [Grailsort](https://github.com/Mrrl/GrailSort), which are in-place merge sorts.  However, they are incredibly complicated and hard to implement.  In addition, in-place stable partitioning is a rather obscure problem in sorting.  Katajainen & Pasanen 1992 describes an O(1) space O(n) time partitioning algorithm, but it's only of theoretical interest.
 
-Logsort is a new sorting algorithm that aims to provide a simple and practical O(n log n) in-place stable sort implementation like alternatives such as Block Sort.  The algorithm uses a novel O(n) in-place stable partitioning algorithm that borrows ideas from Munro et al. 1990 and [Aeos Quicksort](https://www.youtube.com/watch?v=_YTl2VJnQ4s) (stable quicksort with O(sqrt n) size blocking).  By applying this partition recursively, we get an O(n log n) sort.
+Logsort is a new sorting algorithm that aims to provide a simple and practical O(n log n) in-place stable sort implementation like alternatives such as Block Sort.  The algorithm uses a novel O(n) in-place stable partitioning algorithm that borrows ideas from Munro et al. 1990 and [Aeos Quicksort](https://www.youtube.com/watch?v=_YTl2VJnQ4s) (stable quicksort with O(sqrt n) size blocking).  By sorting recursively using this partition, we get an O(n log n) sort.
 
 ## Algorithm
 
