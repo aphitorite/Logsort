@@ -13,7 +13,7 @@ O(n log n) in-place stable sorting is hard to achieve for sorting algorithms.  B
 
 One class of sorting algorithms that achieve both in-place, stability, and O(n log n) time is Block Sort (a.k.a. Block Merge Sorts), such as [Wikisort](https://github.com/BonzaiThePenguin/WikiSort) and [Grailsort](https://github.com/Mrrl/GrailSort), which are in-place merge sorts.  However, they are incredibly complicated and hard to implement.  In addition, in-place stable partitioning is a rather obscure problem in sorting.  Katajainen & Pasanen 1992 describes an O(1) space O(n) time partitioning algorithm, but it's only of theoretical interest.
 
-Logsort is a new sorting algorithm that aims to provide a simple and practical O(n log n) in-place stable sort implementation like alternatives such as Block Sort.  The algorithm uses a novel O(n) in-place stable partitioning algorithm different than Katajainen & Pasanen 1992 and borrows ideas from [Aeos Quicksort](https://www.youtube.com/watch?v=_YTl2VJnQ4s) (stable quicksort with O(sqrt n) size blocking).  By sorting recursively using this partition, we get an O(n log n) sort.
+Logsort is a new sorting algorithm that aims to provide a simple and practical O(n log n) in-place stable sort implementation like alternatives such as Block Sort.  The algorithm uses a novel O(n) in-place stable partitioning algorithm different than Katajainen & Pasanen 1992 and borrows ideas from [Aeos Quicksort](https://www.youtube.com/watch?v=_YTl2VJnQ4s) (stable quicksort with O(sqrt n) size blocking).  By sorting recursively using this partition, we get an O(n log n) sorting algorithm.
 
 ## Algorithm
 
@@ -27,7 +27,7 @@ The four phases of the partition algorithm in more detail along with proofs:
 3. [Swapping the blocks](https://github.com/aphitorite/Logsort#swapping-the-blocks)
 4. [Sorting the blocks](https://github.com/aphitorite/Logsort#sorting-the-blocks) (+ [cleanup](https://github.com/aphitorite/Logsort#cleaning-up))
 
-The entire partition is implemented in about 100 lines of C code: [logPartition.c](https://github.com/aphitorite/Logsort/blob/main/logPartition.c).
+The entire partition is implemented in about 100 lines of C code: [logPartition.c](https://github.com/aphitorite/Logsort/blob/main/logPartition.c)
 
 ## Grouping phase
 
