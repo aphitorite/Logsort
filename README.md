@@ -5,11 +5,11 @@ Logsort is a novel practical in-place stable O(n log n) quicksort.  The algorith
 
 To see Logsort's practical performance, jump to [Results](https://github.com/aphitorite/Logsort#Results).
 
-**Usage:** define `VAR` type and `CMP` comparison function.
+**Usage:** define `VAR` element type and `CMP` comparison function.
 
 ## Motivation
 
-O(n log n) in-place stable sorting is a hard task to achieve for sorting algorithms.  Bubble Sort and Insertion Sort are stable and in-place but suboptimal.  Efficient sorts, such as Quicksort and Heapsort, are in-place and O(n log n) but unstable.  
+O(n log n) in-place stable sorting is hard to achieve for sorting algorithms.  Bubble Sort and Insertion Sort are stable and in-place but suboptimal.  Efficient sorts, such as Quicksort and Heapsort, are in-place and O(n log n) but unstable.  
 
 One class of sorting algorithms that achieve both in-place, stability, and O(n log n) time is Block Sort (a.k.a. Block Merge Sorts), such as [Wikisort](https://github.com/BonzaiThePenguin/WikiSort) and [Grailsort](https://github.com/Mrrl/GrailSort), which are in-place merge sorts.  However, they are incredibly complicated and hard to implement.  In addition, in-place stable partitioning is a rather obscure problem in sorting.  Katajainen & Pasanen 1992 describes an O(1) space O(n) time partitioning algorithm, but it's only of theoretical interest.
 
@@ -19,13 +19,15 @@ Logsort is a new sorting algorithm that aims to provide a simple and practical O
 
 Partitioning is analogous to sorting an array of 0's and 1's, where elements smaller than the pivot are 0 and elements larger are 1.  Logsort sorts 0's and 1's stably in O(n) time and O(log n) space via its partition.
 
-The partitioning algorithm is divided into four phases:
+In brief, Logsort groups 0's and 1's elements into blocks of size O(log n) using its available space.  By swapping elements among the 0 and 1 blocks, it assigns a unique index to each block.  The algorithm then performs an LL block swap partition on the blocks which preserves the order of one partition but not the other.  Using the assigned indices from earlier, Logsort restores the order of the blocks in the scrambled partition.  Lastly, the leftover 0's not divisible by the block length are shifted into place, and the Logsort partition is completed in O(n) time and O(log n) space.
+
+The four phases of the partition algorithm in more detail along with proofs:
 1. [Grouping elements into blocks](https://github.com/aphitorite/Logsort#grouping-phase)
 2. [Bit encoding the blocks](https://github.com/aphitorite/Logsort#bit-encoding)
 3. [Swapping the blocks](https://github.com/aphitorite/Logsort#swapping-the-blocks)
 4. [Sorting the blocks](https://github.com/aphitorite/Logsort#sorting-the-blocks) (+ [cleanup](https://github.com/aphitorite/Logsort#cleaning-up))
 
-In brief, Logsort groups 0's and 1's elements into blocks of size O(log n) using its available space.  By swapping elements among the 0 and 1 blocks, it assigns a unique index to each block.  The algorithm then performs an LL block swap partition on the blocks which preserves the order of one partition but not the other.  Using the assigned indices from earlier, Logsort restores the order of the blocks in the scrambled partition.  Lastly, the leftover 0's not divisible by the block length are shifted into place, and the Logsort partition is completed in O(n) time and O(log n) space.
+The entire partition is implemented in about 100 lines of C code: [logPartition.c](https://github.com/aphitorite/Logsort/blob/main/logPartition.c)
 
 ## Grouping phase
 
@@ -132,6 +134,8 @@ In this example, there were fewer 0 blocks, so all 0 blocks get encoded leaving 
 Once the blocks are encoded, we swap the blocks belonging to the larger partition.  In our example, there are more 1 blocks than 0 blocks so we scan the blocks' reserved bit and swap the 1 blocks to the right into their correct place:
 
 ```
+Swap blocks:
+
  (0)   (0)   (1)   (2)   (1)         (2)
 [ 0a ][ 1a ][ 1b ][ 1c ][ 0b ][ 1d ][ 0c ][ 1e ]
                               └────┘└────┘ block swap
@@ -162,7 +166,7 @@ Swapping blocks in this fashion preserves the order of the 1 blocks.  If there w
 Reordering the scrambled blocks is quite easy: simply iterate across the blocks.  If the current block's index is not equal to the iterator, block swap the current block to the read index.  Repeat this step until the current block's index matches the iterator and move on to the next block.
 
 ```
-Swap blocks:
+Sort blocks:
 
  (0)←  (2)   (1)   (0)   (1)   (2)
 [ 0a ][ 0c ][ 0b ][ 1a ][ 1b ][ 1c ][ 1d ][ 1e ]
