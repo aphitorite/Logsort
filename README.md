@@ -1,7 +1,7 @@
 
 ## Introduction
 
-Logsort is a novel practical in-place stable O(n log n) quicksort.  The algorithm uses O(log n) space, hence the name, which many consider to be in-place despite not being the optimal O(1).  Unlike well-known in-place stable sorts, such as std::stable_sort, which are O(n log² n), Logsort is asymptotically optimal.
+Logsort is a novel practical in-place stable O(n log n) quicksort.  The algorithm uses O(log n) space, hence the name, which many already consider to be in-place despite not being the optimal O(1).  Unlike well-known in-place stable sorts which are O(n log² n), such as std::stable_sort, Logsort is asymptotically optimal.
 
 To see Logsort's practical performance, jump to [Results](https://github.com/aphitorite/Logsort#Results).
 
@@ -308,13 +308,13 @@ All sorts are compiled using `gcc -O3` and sorting a random linear distribution 
 | Sqrtsort  |     16384 | int32 |            449 |     100 |     4 unique |
 | Blitsort  |     16384 | int32 |             80 |     100 |     4 unique |
 
-|      Sort | List Size |  Type |  Average Time | Trials  |   Distribution |
-| --------- | --------- | ----- | ------------- | ------- | -------------- |
-| Logsort   |   1048576 | int32 |         48678 |     100 | 1048576 unique |
-| Grailsort |   1048576 | int32 |         80155 |     100 | 1048576 unique |
-| Octosort  |   1048576 | int32 |         74480 |     100 | 1048576 unique |
-| Sqrtsort  |   1048576 | int32 |         67130 |     100 | 1048576 unique |
-| Blitsort  |   1048576 | int32 |         44571 |     100 | 1048576 unique |
+|      Sort | List Size |  Type | Avg. Time (μs) | Trials  |   Distribution |
+| --------- | --------- | ----- | -------------- | ------- | -------------- |
+| Logsort   |   1048576 | int32 |          48678 |     100 | 1048576 unique |
+| Grailsort |   1048576 | int32 |          80155 |     100 | 1048576 unique |
+| Octosort  |   1048576 | int32 |          74480 |     100 | 1048576 unique |
+| Sqrtsort  |   1048576 | int32 |          67130 |     100 | 1048576 unique |
+| Blitsort  |   1048576 | int32 |          44571 |     100 | 1048576 unique |
 
 |      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
 | --------- | --------- | ----- | -------------- | ------- | ------------ |
