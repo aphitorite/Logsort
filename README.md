@@ -97,12 +97,11 @@ Logsort's O(log n) space usage comes from grouping blocks of size O(log n), and 
 Encode 11 = 0b1101:
 
 [0, 0, 0, 0, 0] [1, 1, 1, 1, 1]
- └───────────────┘
-    └───────────────┘          ← swap the following
-          └───────────────┘
+ ↑  ↑     ↑      ↑  ↑     ↑
+ 1  2     3      1  2     3  ← swap the following
           
 ┌─── 11 ───┐    ┌── ~11 ───┐
-[1, 1, 0, 1, 0] [0, 0, 1, 0, 1]
+[1, 1, 0, 1, 0] [0, 0, 1, 0, 1] ← the pair of blocks are now encoded with 11
              ↑               ↑ 
              last bit reserved to determine 0 or 1 block
 ```
@@ -217,7 +216,7 @@ for each index from 0 to blocks.count - 1:
 
 ### Cleaning up
 
-After the sorting phase, the blocks are now partitioned stably in O(n) time.  However, some elements between blocks are still swapped from the encoding phase, and we want to restore the original states of the blocks.  Since they are in order, we can easily "uncode" them, by encoding them with the same index, to complete the partition on the blocks.
+After the sorting phase, the blocks are now partitioned stably in O(n) time.  However, some elements between blocks are still swapped from the encoding phase, and we want to restore the original states of the blocks.  Since both 0 blocks and 1 blocks are in order, we can easily reaccess the original encoded block pairs along with their indices in ascending order.  We then can "uncode" them by applying the encode algorithm again with the same index.  After iterating and uncoding the block pairs, we complete the partition on the blocks.
 
 ```
 Uncode blocks:
