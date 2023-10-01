@@ -377,8 +377,8 @@ The author would like to thank members of the Discord server "The Studio" ([http
 
 - **@anonymous0726** for providing Aeos Quicksort as a reference
 - **!- DISTRAY -!#9097** for revising the block encoding algorithm
-- **@control._.** for answering questions regarding practical performance
-- **@scandum** ([github](https://github.com/scandum)) for providing lots of useful C code as reference as well as answering questions
+- **@control._.** for giving helpful suggestions regarding cache utilization
+- **@scandum** ([github](https://github.com/scandum)) for providing lots of useful C code as reference and helpful answers to questions
 
 ## References
 
