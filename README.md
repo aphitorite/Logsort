@@ -7,6 +7,12 @@ To see Logsort's practical performance, jump to [Results](https://github.com/aph
 
 **Usage:** define `VAR` element type and `CMP` comparison function.
 
+## Visualization
+
+(Youtube) Logsort visualized on N = 2049 with 9 extra space allocated.
+
+[![Video](https://img.youtube.com/vi/be9dpGwciUo/0.jpg)](https://www.youtube.com/watch?v=be9dpGwciUo)
+
 ## Motivation
 
 O(n log n) in-place stable sorting is hard to achieve for sorting algorithms.  Bubble Sort and Insertion Sort are stable and in-place but suboptimal.  Efficient sorts, such as Quicksort and Heapsort, are in-place and O(n log n) but unstable.  
