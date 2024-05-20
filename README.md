@@ -280,7 +280,7 @@ An O(n log n) in-place stable sort in theory sounds great, but how does it compa
 - [**Sqrtsort**](https://github.com/Mrrl/SqrtSort) +SqrtN aux (Block Merge Sort)
 - [**Blitsort**](https://github.com/scandum/blitsort) +512 aux (Fast Rotate Merge/Quick Sort, O(n log² n))
 
-All sorts are compiled using `gcc -O3` and sorting a random linear distribution of 32-bit integers containing N unique, Sqrt(N) unique, and 4 unique values respectively.  The average time among 100 trials is recorded.
+All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 using WSL.  The algorithms sort a random linear distribution of 32-bit integers containing N unique, Sqrt(N) unique, and 4 unique values respectively.  The average time among 100 trials is recorded.
 
 ![2^14](https://github.com/aphitorite/Logsort/blob/main/graphs/exp14.png)
 ![2^20](https://github.com/aphitorite/Logsort/blob/main/graphs/exp20.png)
@@ -288,78 +288,77 @@ All sorts are compiled using `gcc -O3` and sorting a random linear distribution 
 
 <details><summary>Data table</summary>
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |     16384 | int32 |            608 |     100 | 16384 unique |
-| Grailsort |     16384 | int32 |           1077 |     100 | 16384 unique |
-| Octosort  |     16384 | int32 |            907 |     100 | 16384 unique |
-| Sqrtsort  |     16384 | int32 |            887 |     100 | 16384 unique |
-| Blitsort  |     16384 | int32 |            439 |     100 | 16384 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |16384    |4 bytes  |43            |56            |100   |4 unique       |
+|Sqrtsort (√)   |16384    |4 bytes  |359           |395           |100   |4 unique       |
+|Octosort (512) |16384    |4 bytes  |325           |357           |100   |4 unique       |
+|Grailsort (512)|16384    |4 bytes  |714           |759           |100   |4 unique       |
+|Logsort (512)  |16384    |4 bytes  |82            |88            |100   |4 unique       |
 
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |16384    |4 bytes  |114           |128           |100   |128 unique     |
+|Sqrtsort (√)   |16384    |4 bytes  |601           |636           |100   |128 unique     |
+|Octosort (512) |16384    |4 bytes  |630           |688           |100   |128 unique     |
+|Grailsort (512)|16384    |4 bytes  |1322          |1387          |100   |128 unique     |
+|Logsort (512)  |16384    |4 bytes  |182           |197           |100   |128 unique     |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |     16384 | int32 |            309 |     100 |   128 unique |
-| Grailsort |     16384 | int32 |           1625 |     100 |   128 unique |
-| Octosort  |     16384 | int32 |            788 |     100 |   128 unique |
-| Sqrtsort  |     16384 | int32 |            778 |     100 |   128 unique |
-| Blitsort  |     16384 | int32 |            190 |     100 |   128 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |16384    |4 bytes  |313           |333           |100   |16384 unique   |
+|Sqrtsort (√)   |16384    |4 bytes  |789           |838           |100   |16384 unique   |
+|Octosort (512) |16384    |4 bytes  |755           |820           |100   |16384 unique   |
+|Grailsort (512)|16384    |4 bytes  |889           |969           |100   |16384 unique   |
+|Logsort (512)  |16384    |4 bytes  |352           |396           |100   |16384 unique   |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |     16384 | int32 |            140 |     100 |     4 unique |
-| Grailsort |     16384 | int32 |            877 |     100 |     4 unique |
-| Octosort  |     16384 | int32 |            498 |     100 |     4 unique |
-| Sqrtsort  |     16384 | int32 |            449 |     100 |     4 unique |
-| Blitsort  |     16384 | int32 |             80 |     100 |     4 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |2097152  |4 bytes  |33330         |35776         |100   |4 unique       |
+|Sqrtsort (√)   |2097152  |4 bytes  |59773         |62678         |100   |4 unique       |
+|Octosort (512) |2097152  |4 bytes  |50874         |55122         |100   |4 unique       |
+|Grailsort (512)|2097152  |4 bytes  |97402         |100945        |100   |4 unique       |
+|Logsort (512)  |2097152  |4 bytes  |11619         |13048         |100   |4 unique       |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  |   Distribution |
-| --------- | --------- | ----- | -------------- | ------- | -------------- |
-| Logsort   |   1048576 | int32 |          48678 |     100 | 1048576 unique |
-| Grailsort |   1048576 | int32 |          80155 |     100 | 1048576 unique |
-| Octosort  |   1048576 | int32 |          74480 |     100 | 1048576 unique |
-| Sqrtsort  |   1048576 | int32 |          67130 |     100 | 1048576 unique |
-| Blitsort  |   1048576 | int32 |          44571 |     100 | 1048576 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |2097152  |4 bytes  |71390         |74953         |100   |1024 unique    |
+|Sqrtsort (√)   |2097152  |4 bytes  |113112        |116592        |100   |1024 unique    |
+|Octosort (512) |2097152  |4 bytes  |112767        |115936        |100   |1024 unique    |
+|Grailsort (512)|2097152  |4 bytes  |230244        |236130        |100   |1024 unique    |
+|Logsort (512)  |2097152  |4 bytes  |36987         |38335         |100   |1024 unique    |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |   1048576 | int32 |          26398 |     100 |  1024 unique |
-| Grailsort |   1048576 | int32 |         102596 |     100 |  1024 unique |
-| Octosort  |   1048576 | int32 |          58953 |     100 |  1024 unique |
-| Sqrtsort  |   1048576 | int32 |          48551 |     100 |  1024 unique |
-| Blitsort  |   1048576 | int32 |          23166 |     100 |  1024 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |2097152  |4 bytes  |92559         |97863         |100   |2097152 unique |
+|Sqrtsort (√)   |2097152  |4 bytes  |162520        |174876        |100   |2097152 unique |
+|Octosort (512) |2097152  |4 bytes  |159167        |165741        |100   |2097152 unique |
+|Grailsort (512)|2097152  |4 bytes  |186188        |193018        |100   |2097152 unique |
+|Logsort (512)  |2097152  |4 bytes  |71537         |73802         |100   |2097152 unique |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |   1048576 | int32 |           8378 |     100 |     4 unique |
-| Grailsort |   1048576 | int32 |          25400 |     100 |     4 unique |
-| Octosort  |   1048576 | int32 |          13972 |     100 |     4 unique |
-| Sqrtsort  |   1048576 | int32 |          22671 |     100 |     4 unique |
-| Blitsort  |   1048576 | int32 |           9794 |     100 |     4 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |16777216 |4 bytes  |368303        |408837        |100   |4 unique       |
+|Sqrtsort (√)   |16777216 |4 bytes  |717768        |766610        |100   |4 unique       |
+|Octosort (512) |16777216 |4 bytes  |536634        |583046        |100   |4 unique       |
+|Grailsort (512)|16777216 |4 bytes  |912700        |981066        |100   |4 unique       |
+|Logsort (512)  |16777216 |4 bytes  |121887        |133894        |100   |4 unique       |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  |    Distribution |
-| --------- | --------- | ----- | -------------- | ------- | --------------- |
-| Logsort   |  16777216 | int32 |         948387 |     100 | 16777216 unique |
-| Grailsort |  16777216 | int32 |        1435800 |     100 | 16777216 unique |
-| Octosort  |  16777216 | int32 |        1342751 |     100 | 16777216 unique |
-| Sqrtsort  |  16777216 | int32 |        1270035 |     100 | 16777216 unique |
-| Blitsort  |  16777216 | int32 |        1112058 |     100 | 16777216 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |16777216 |4 bytes  |768658        |829648        |100   |1024 unique    |
+|Sqrtsort (√)   |16777216 |4 bytes  |1192201       |1260056       |100   |1024 unique    |
+|Octosort (512) |16777216 |4 bytes  |1058330       |1112640       |100   |1024 unique    |
+|Grailsort (512)|16777216 |4 bytes  |2134834       |2248346       |100   |1024 unique    |
+|Logsort (512)  |16777216 |4 bytes  |360716        |383329        |100   |1024 unique    |
 
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |  16777216 | int32 |         574215 |     100 |  4096 unique |
-| Grailsort |  16777216 | int32 |        1874886 |     100 |  4096 unique |
-| Octosort  |  16777216 | int32 |         996803 |     100 |  4096 unique |
-| Sqrtsort  |  16777216 | int32 |         911584 |     100 |  4096 unique |
-| Blitsort  |  16777216 | int32 |         684639 |     100 |  4096 unique |
-
-|      Sort | List Size |  Type | Avg. Time (μs) | Trials  | Distribution |
-| --------- | --------- | ----- | -------------- | ------- | ------------ |
-| Logsort   |  16777216 | int32 |         170226 |     100 |     4 unique |
-| Grailsort |  16777216 | int32 |         298393 |     100 |     4 unique |
-| Octosort  |  16777216 | int32 |         114446 |     100 |     4 unique |
-| Sqrtsort  |  16777216 | int32 |         489439 |     100 |     4 unique |
-| Blitsort  |  16777216 | int32 |          50563 |     100 |     4 unique |
+|Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
+|---------------|---------|---------|--------------|--------------|------|---------------|
+|Blitsort (512) |16777216 |4 bytes  |1047616       |1136746       |100   |16777216 unique|
+|Sqrtsort (√)   |16777216 |4 bytes  |1779386       |1851274       |100   |16777216 unique|
+|Octosort (512) |16777216 |4 bytes  |1659813       |1744369       |100   |16777216 unique|
+|Grailsort (512)|16777216 |4 bytes  |1933569       |2069484       |100   |16777216 unique|
+|Logsort (512)  |16777216 |4 bytes  |738249        |784092        |100   |16777216 unique|
 
 </details>
 
