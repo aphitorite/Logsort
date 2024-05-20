@@ -283,7 +283,7 @@ An O(n log n) in-place stable sort in theory sounds great, but how does it compa
 All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 using WSL.  The algorithms sort a random linear distribution of 32-bit integers containing N unique, Sqrt(N) unique, and 4 unique values respectively.  The average time among 100 trials is recorded.
 
 ![2^14](https://github.com/aphitorite/Logsort/blob/main/graphs/exp14.png)
-![2^20](https://github.com/aphitorite/Logsort/blob/main/graphs/exp20.png)
+![2^20](https://github.com/aphitorite/Logsort/blob/main/graphs/exp21.png)
 ![2^24](https://github.com/aphitorite/Logsort/blob/main/graphs/exp24.png)
 
 <details><summary>Data table</summary>
@@ -291,7 +291,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |16384    |4 bytes  |43            |56            |100   |4 unique       |
-|Sqrtsort (√N)   |16384    |4 bytes  |359           |395           |100   |4 unique       |
+|Sqrtsort (√N)  |16384    |4 bytes  |359           |395           |100   |4 unique       |
 |Octosort (512) |16384    |4 bytes  |325           |357           |100   |4 unique       |
 |Grailsort (512)|16384    |4 bytes  |714           |759           |100   |4 unique       |
 |Logsort (512)  |16384    |4 bytes  |82            |88            |100   |4 unique       |
@@ -299,7 +299,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |16384    |4 bytes  |114           |128           |100   |128 unique     |
-|Sqrtsort (√N)   |16384    |4 bytes  |601           |636           |100   |128 unique     |
+|Sqrtsort (√N)  |16384    |4 bytes  |601           |636           |100   |128 unique     |
 |Octosort (512) |16384    |4 bytes  |630           |688           |100   |128 unique     |
 |Grailsort (512)|16384    |4 bytes  |1322          |1387          |100   |128 unique     |
 |Logsort (512)  |16384    |4 bytes  |182           |197           |100   |128 unique     |
@@ -307,7 +307,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |16384    |4 bytes  |313           |333           |100   |16384 unique   |
-|Sqrtsort (√N)   |16384    |4 bytes  |789           |838           |100   |16384 unique   |
+|Sqrtsort (√N)  |16384    |4 bytes  |789           |838           |100   |16384 unique   |
 |Octosort (512) |16384    |4 bytes  |755           |820           |100   |16384 unique   |
 |Grailsort (512)|16384    |4 bytes  |889           |969           |100   |16384 unique   |
 |Logsort (512)  |16384    |4 bytes  |352           |396           |100   |16384 unique   |
@@ -315,7 +315,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |2097152  |4 bytes  |33330         |35776         |100   |4 unique       |
-|Sqrtsort (√N)   |2097152  |4 bytes  |59773         |62678         |100   |4 unique       |
+|Sqrtsort (√N)  |2097152  |4 bytes  |59773         |62678         |100   |4 unique       |
 |Octosort (512) |2097152  |4 bytes  |50874         |55122         |100   |4 unique       |
 |Grailsort (512)|2097152  |4 bytes  |97402         |100945        |100   |4 unique       |
 |Logsort (512)  |2097152  |4 bytes  |11619         |13048         |100   |4 unique       |
@@ -323,7 +323,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |2097152  |4 bytes  |71390         |74953         |100   |1024 unique    |
-|Sqrtsort (√N)   |2097152  |4 bytes  |113112        |116592        |100   |1024 unique    |
+|Sqrtsort (√N)  |2097152  |4 bytes  |113112        |116592        |100   |1024 unique    |
 |Octosort (512) |2097152  |4 bytes  |112767        |115936        |100   |1024 unique    |
 |Grailsort (512)|2097152  |4 bytes  |230244        |236130        |100   |1024 unique    |
 |Logsort (512)  |2097152  |4 bytes  |36987         |38335         |100   |1024 unique    |
@@ -331,7 +331,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |2097152  |4 bytes  |92559         |97863         |100   |2097152 unique |
-|Sqrtsort (√N)   |2097152  |4 bytes  |162520        |174876        |100   |2097152 unique |
+|Sqrtsort (√N)  |2097152  |4 bytes  |162520        |174876        |100   |2097152 unique |
 |Octosort (512) |2097152  |4 bytes  |159167        |165741        |100   |2097152 unique |
 |Grailsort (512)|2097152  |4 bytes  |186188        |193018        |100   |2097152 unique |
 |Logsort (512)  |2097152  |4 bytes  |71537         |73802         |100   |2097152 unique |
@@ -339,7 +339,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |16777216 |4 bytes  |368303        |408837        |100   |4 unique       |
-|Sqrtsort (√N)   |16777216 |4 bytes  |717768        |766610        |100   |4 unique       |
+|Sqrtsort (√N)  |16777216 |4 bytes  |717768        |766610        |100   |4 unique       |
 |Octosort (512) |16777216 |4 bytes  |536634        |583046        |100   |4 unique       |
 |Grailsort (512)|16777216 |4 bytes  |912700        |981066        |100   |4 unique       |
 |Logsort (512)  |16777216 |4 bytes  |121887        |133894        |100   |4 unique       |
@@ -347,7 +347,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |16777216 |4 bytes  |768658        |829648        |100   |1024 unique    |
-|Sqrtsort (√N)   |16777216 |4 bytes  |1192201       |1260056       |100   |1024 unique    |
+|Sqrtsort (√N)  |16777216 |4 bytes  |1192201       |1260056       |100   |1024 unique    |
 |Octosort (512) |16777216 |4 bytes  |1058330       |1112640       |100   |1024 unique    |
 |Grailsort (512)|16777216 |4 bytes  |2134834       |2248346       |100   |1024 unique    |
 |Logsort (512)  |16777216 |4 bytes  |360716        |383329        |100   |1024 unique    |
@@ -355,7 +355,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |16777216 |4 bytes  |1047616       |1136746       |100   |16777216 unique|
-|Sqrtsort (√N)   |16777216 |4 bytes  |1779386       |1851274       |100   |16777216 unique|
+|Sqrtsort (√N)  |16777216 |4 bytes  |1779386       |1851274       |100   |16777216 unique|
 |Octosort (512) |16777216 |4 bytes  |1659813       |1744369       |100   |16777216 unique|
 |Grailsort (512)|16777216 |4 bytes  |1933569       |2069484       |100   |16777216 unique|
 |Logsort (512)  |16777216 |4 bytes  |738249        |784092        |100   |16777216 unique|
@@ -364,15 +364,15 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 
 ## Concluding remarks
 
-Grailsort, Octosort, and Sqrtsort used branched comparisons in merging.  Logsort was optimized with branchless comparisons similar to [Fluxsort](https://github.com/scandum/fluxsort/) which greatly improved its performance. (40% increase in speed!)
+Grailsort, Octosort, and Sqrtsort used branched comparisons in merging.  Logsort was optimized with branchless comparisons similar to [Fluxsort](https://github.com/scandum/fluxsort/) which greatly improved its performance with a 40% increase in speed!  Since Logsort is a stable quicksort by nature, branchless comparisons were easier to implement contrary to a Block Merge Sort.
 
 Unlike Block Merge Sorts, Logsort relies on its bit encoding to store information rather than distinct values.  This avoids any overhead in a key collection algorithm; we see this happening with Grailsort spending O(n log n) comparisons finding SqrtN uniques.
 
-Being a stable quicksort, Logsort naturally performs well on data with few uniques boasting a O(n log u) complexity.  However, Octosort and Blitsort beat Logsort on a data size of 16M with 4 uniques despite having a complexity of O(n log n log u).  This is likely due to Logsort's poorer access patterns and overhead compared to simple merges with rotations.
+Being a stable quicksort, Logsort naturally performs well on data with few uniques boasting a O(n log u) complexity.  However, Octosort and Blitsort beat Logsort on a data size of 16M with 4 uniques despite having a complexity of O(n log n log u).  This is likely due to Logsort's poorer access patterns and overhead compared to simple merges with rotations. *(Edit 5/19/2024: new benchmark data shows that Logsort can outperform Blitsort on the 4 uniques distribution as well.)*
 
 Logsort's main rival, Blitsort, is an optimized Rotate Merge/Quick Sort which uses rotations to merge/partition but has a suboptimal O(n log² n) complexity.  Despite this, Rotate Merge is known to beat the optimal Block Merge owing to its simplicity, good locality, and low overhead.
 
-In the benchmarks, Logsort remained competitive with Blitsort on 16k and 1M integers and even beat Blitsort on 16M integers with its superior time complexity.  Unlike Blitsort, however, Logsort is not optimized to be an adaptive sort, and this comparison is only on random data.  A hybrid between a rotate partition and blocked partition is also a good idea, but such an optimization is left to the reader.
+In the benchmarks, Logsort remained competitive with Blitsort on 10^5 to 10^6 integers and even beat Blitsort on 2 * 10^6 integers and beyond with its superior time complexity.  Unlike Blitsort, however, Logsort is not optimized to be an adaptive sort, and this comparison is only on random data.  A hybrid between a rotate partition and blocked partition is also a good idea, but such an optimization is left to the reader.
 
 With further improvements, it's likely that stable O(n log n) in-place sorting has practical application outside of theory.  It's worth noting that Logsort's application is quite galactic, only seeing benefits on lengths in the tens of millions.  However, despite Logsort's simplicity compared to Block Merge Sorts, these algorithms remain fairly complicated compared to their unstable counterparts.  
 
