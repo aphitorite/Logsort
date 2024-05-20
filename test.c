@@ -2,7 +2,7 @@
  * 
 MIT License
 
-Copyright (c) 2022-2023 aphitorite
+Copyright (c) 2022-2024 aphitorite
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,10 @@ SOFTWARE.
 #include <time.h>
 #include <errno.h>
 #include <math.h>
+#include <assert.h>
 
-const int SEED = 0;
+#define SEED 0
+#define LEN(A) (sizeof(A) / sizeof(*A))
 
 long long utime()
 {
@@ -51,7 +53,7 @@ int cmp_int0(const void * a, const void * b)
 	return fa - fb;
 }
 
-//grailsort & sqrtsort
+//import sorts
 
 #include <stdbool.h>
 #define SORT_TYPE int
@@ -60,15 +62,8 @@ int cmp_int0(const void * a, const void * b)
 #include "GrailSort.h"
 #include "SqrtSort.h"
 
-//blitsort
-
 #include "blitsort.h"
-
-//octosort
-
 #include "octosort.h"
-
-//logsort
 
 #define VAR int
 #define CMP cmp_int0 //(a,b) (*(a) - *(b))
@@ -84,7 +79,7 @@ void randArray(VAR *a, size_t n, size_t s) {
 		a[j] = (VAR)(i >> s);
 	}
 }
-char verify(size_t *a, size_t n, size_t s) {
+char verify(VAR *a, size_t n, size_t s) {
 	for(size_t i = 0; i < n; i++)
 		if(a[i] != (i >> s)) return 0;
 	return 1;
@@ -118,11 +113,14 @@ void blitsortTest(VAR *a, size_t n, size_t b) {
 	blitsort32(a, n, cmp_int0);
 }
 
-unsigned long sortTrial(void (*sort)(VAR*, size_t, size_t), VAR *a, size_t n, size_t bLen, size_t sh, size_t trials) {
+//sort trial
+
+void sortTrial(long long *times, void (*sort)(VAR*, size_t, size_t), VAR *a, size_t n, size_t bLen, size_t sh, size_t trials) {
 	srand(SEED);
 	
+	unsigned long long best = -1;
 	double avg = 0;
-	long long start, end;
+	long long start, end, res;
 	
 	for(size_t i = 0; i < trials; i++) {
 		randArray(a, n, sh);
@@ -132,19 +130,75 @@ unsigned long sortTrial(void (*sort)(VAR*, size_t, size_t), VAR *a, size_t n, si
 		sort(a, n, bLen);
 		
 		end = utime();
-		avg += end-start;
+		res = end-start;
+		
+		assert(verify(a, n, sh));
+		
+		best = res < best ? res : best;
+		avg += res;
 	}
-	return (unsigned long)(avg / trials + 0.5);
+	times[0] = best; 
+	times[1] = (long long)(avg / trials + 0.5);
 }
 
-void sortTrials(void (*sorts[])(VAR*, size_t, size_t), char *sortNames[], unsigned long time[], size_t sortCount, void (*shuffle)(VAR*, size_t, size_t),
+void sortTrials(long long *times, void (*sorts[])(VAR*, size_t, size_t), char *sortNames[], size_t sortCount, void (*shuffle)(VAR*, size_t, size_t),
                 VAR *a, size_t n, size_t bLen, size_t sh, size_t trials) {
 	
-	printf("\nn = %d, unique = %d, %d trial(s), sorting %d bits\n", n, n >> sh, trials, 8*sizeof(VAR));
+	printf("Sort,List Size,Data Type,Best Time (\u00B5s),Avg. Time (\u00B5s),Trials,Distribution\n");
 	
 	for(size_t i = 0; i < sortCount; i++) {
-		time[i] = sortTrial(sorts[i], a, n, bLen, sh, trials);
-		printf("%s -\t%d\n", sortNames[i], time[i]);
+		sortTrial(times, sorts[i], a, n, bLen, sh, trials);
+		
+		if(i > 0) //sometimes the times are biased for the first sort 
+			printf("%s,%ld,%ld bytes,%lld,%lld,%ld,%ld unique\n", sortNames[i], n, sizeof(VAR), times[0], times[1], trials, n >> sh);
+	}
+	printf("\n");
+}
+
+void sortTrialsS(long long *times, void (*sorts[])(VAR*, size_t, size_t), char *sortNames[], size_t sortCount, void (*shuffle)(VAR*, size_t, size_t),
+                VAR *a, size_t n, size_t bLen, size_t *shifts, char *sNames[], size_t sCnt, size_t trials) {
+	
+	printf("Avg. Time (\u00B5s):");
+	for(size_t i = 1; i < sortCount; i++)
+		printf(",%s", sortNames[i]);
+	printf("\n");
+	
+	for(size_t j = 0; j < sCnt; j++) {
+		printf("%s", sNames[j]);
+		size_t sh = shifts[j];
+		
+		for(size_t i = 0; i < sortCount; i++) {
+			sortTrial(times, sorts[i], a, n, bLen, sh, trials);
+			
+			if(i > 0) //sometimes the times are biased for the first sort 
+				printf(",%lld", times[1]);
+		}
+		printf("\n");
+	}
+}
+
+void sortTrialsN(long long *times, void (*sorts[])(VAR*, size_t, size_t), char *sortNames[], size_t sortCount, void (*shuffle)(VAR*, size_t, size_t),
+                VAR *a, size_t *nList, size_t nCnt, size_t *bList, size_t sh, size_t trials) {
+	
+	printf("Avg. Time (\u00B5s):");
+	for(size_t i = 1; i < sortCount; i++)
+		printf(",%s", sortNames[i]);
+	printf("\n");
+	
+	for(size_t j = 0; j < nCnt; j++) {
+		size_t n = nList[j];
+		printf("N = %ld", n); 
+		fflush(stdout);
+		
+		for(size_t i = 0; i < sortCount; i++) {
+			sortTrial(times, sorts[i], a, n, bList[i], sh, trials);
+			
+			if(i > 0) { //sometimes the times are biased for the first sort 
+				printf(",%lld", times[1]);
+				fflush(stdout);
+			}
+		}
+		printf("\n");
 	}
 }
 
@@ -179,36 +233,34 @@ void printABars(VAR *a, size_t n) {
 }
 
 int main() {
-	size_t n = 1 << 24, b = 512, sh = 0;
-	
+	size_t n = 1 << 24, b = 512;
 	VAR *a = malloc(n * sizeof(VAR));
 	
-	/*randArray(a, n, sh);
-	logSortMain(a, s, n, b);
-	
-	if(verify(a, n, sh)) 
-		printf("Success!\n");
-	else
-		printf("Fail!\n");*/
-	
-	//grail_commonSort(a, n, s, b);
-	
 	size_t trials = 100;
-	size_t sortCount = 5;
-	void (*sorts[])(VAR*, size_t, size_t) = {logSort, grailsortTest, octosortTest, sqrtsortTest, blitsortTest};
-	char *sortNames[] = {"logsort", "grailsort", "octosort", "sqrtsort", "blitsort"};
-	unsigned long time[sortCount];
-	printf("using buffer size %d\n", b);
+	void (*sorts[])(VAR*, size_t, size_t) = {logSort, blitsortTest, sqrtsortTest, octosortTest, grailsortTest, logSort};
+	size_t sortCount = LEN(sorts);
+	char *sortNames[] = {"", "Blitsort (512)", "Sqrtsort (\u221AN)", "Octosort (512)", "Grailsort (512)", "Logsort (24)"}; 
+	long long times[2];
 	
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 14, b, 0,  trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 14, b, 7,  trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 14, b, 12, trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 20, b, 0,  trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 20, b, 10, trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 20, b, 18, trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 24, b, 0,  trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 24, b, 12, trials);
-	sortTrials(sorts, sortNames, time, sortCount, randArray, a, 1 << 24, b, 22, trials);
+	/*size_t bList[] = {512, 512, 512, 512, 24, 24, 24};
+	size_t nList[] = {10000000, 1000000, 100000, 10000, 1000};
+	size_t nCnt = LEN(nList);
+	
+	sortTrialsN(times, sorts, sortNames, sortCount, randArray, a, nList, nCnt, bList, 0, 100);*/
+	
+	printf("using buffer size %ld\n\n", b);
+	
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 12, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 7,  trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 0,  trials);
+	
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 21, b, 19, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 21, b, 11, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 21, b, 0,  trials);
+	
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 22, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 14, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 0,  trials);
 	
 	free(a);
 	
