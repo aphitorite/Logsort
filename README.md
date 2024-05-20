@@ -315,7 +315,7 @@ All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 u
 |Sort           |List Size|Data Type|Best Time (µs)|Avg. Time (µs)|Trials|Distribution   |
 |---------------|---------|---------|--------------|--------------|------|---------------|
 |Blitsort (512) |2097152  |4 bytes  |33330         |35776         |100   |4 unique       |
-|Sqrtsort (√)   |2097152  |4 bytes  |59773         |62678         |100   |4 unique       |
+|Sqrtsort (√N)   |2097152  |4 bytes  |59773         |62678         |100   |4 unique       |
 |Octosort (512) |2097152  |4 bytes  |50874         |55122         |100   |4 unique       |
 |Grailsort (512)|2097152  |4 bytes  |97402         |100945        |100   |4 unique       |
 |Logsort (512)  |2097152  |4 bytes  |11619         |13048         |100   |4 unique       |
@@ -381,7 +381,7 @@ With further improvements, it's likely that stable O(n log n) in-place sorting h
 The author would like to thank members of the Discord server "The Studio" ([https://discord.gg/thestudio](https://discord.gg/thestudio "https://discord.gg/thestudio")) particularly:
 
 - **@anonymous0726** for providing Aeos Quicksort as a reference
-- **!- DISTRAY -!#9097** for revising the block encoding algorithm
+- **@dystair** for revising the block encoding algorithm
 - **@control._.** for giving helpful suggestions regarding cache utilization
 - **@scandum** ([github](https://github.com/scandum)) for providing lots of useful C code as reference and helpful answers to questions
 
