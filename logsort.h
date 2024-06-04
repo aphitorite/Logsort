@@ -210,3 +210,5 @@ void logSort(VAR *a, size_t n, size_t bLen) {
 	logSortMain(a, s, n, bLen);
 	free(s);
 }
+
+#undef MIN_INSERT
