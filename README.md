@@ -109,7 +109,7 @@ Encode decimal number 13 = 0b1101:
  1  2     3      1  2     3  ← swap the following
           
 ┌─── 13 ───┐    ┌── ~13 ───┐
-[1, 1, 0, 1, 0] [0, 0, 1, 0, 1] ← the pair of blocks are now encoded with 11
+[1, 1, 0, 1, 0] [0, 0, 1, 0, 1] ← the pair of blocks are now encoded with 13
              ↑               ↑ 
              last bit reserved to determine 0 or 1 block
 ```
