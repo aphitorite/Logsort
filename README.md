@@ -102,13 +102,13 @@ Logsort's O(log n) space usage comes from grouping blocks of size O(log n), and 
 > There are at most O(n/log n) encodable blocks which require log(n/log n) = O(log n) bits to represent a number range from 0 to O(n/log n).
 
 ```
-Encode 11 = 0b1101:
+Encode decimal number 13 = 0b1101:
 
 [0, 0, 0, 0, 0] [1, 1, 1, 1, 1]
  ↑  ↑     ↑      ↑  ↑     ↑
  1  2     3      1  2     3  ← swap the following
           
-┌─── 11 ───┐    ┌── ~11 ───┐
+┌─── 13 ───┐    ┌── ~13 ───┐
 [1, 1, 0, 1, 0] [0, 0, 1, 0, 1] ← the pair of blocks are now encoded with 11
              ↑               ↑ 
              last bit reserved to determine 0 or 1 block
