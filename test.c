@@ -45,10 +45,12 @@ long long utime()
 	return now_time.tv_sec * 1000000LL + now_time.tv_usec;
 }
 
-int cmp_int0(const void * a, const void * b)
+//benching against qsort: no inline
+
+__attribute__ ((noinline)) int cmp(const void * a, const void * b)
 {
-	const int fa = *(const int *) a;
-	const int fb = *(const int *) b;
+	const long long fa = *(const long long *) a;
+	const long long fb = *(const long long *) b;
 
 	return fa - fb;
 }
@@ -56,17 +58,20 @@ int cmp_int0(const void * a, const void * b)
 //import sorts
 
 #include <stdbool.h>
-#define SORT_TYPE int
-#define SORT_CMP cmp_int0 //(a,b) (*(a) - *(b))
+#define SORT_TYPE long long
+#define SORT_CMP cmp //(a,b) (*(a) - *(b))
 
 #include "GrailSort.h"
 #include "SqrtSort.h"
 
+#undef SORT_TYPE
+#undef SORT_CMP
+
 #include "blitsort.h"
 #include "octosort.h"
 
-#define VAR int
-#define CMP cmp_int0 //(a,b) (*(a) - *(b))
+#define VAR long long
+#define CMP cmp //(a,b) (*(a) - *(b))
 
 #include "logsort.h"
 
@@ -93,6 +98,10 @@ void backwards(VAR *a, size_t n, size_t s) {
 
 //test sorts
 
+void qsortTest(VAR *a, size_t n, size_t b) {
+	qsort(a, n, sizeof(*a), cmp);
+}
+
 void grailsortTest(VAR *a, size_t n, size_t b) {
 	VAR *s = malloc(b * sizeof(VAR));
 	grail_commonSort(a, n, s, b);
@@ -105,12 +114,12 @@ void sqrtsortTest(VAR *a, size_t n, size_t b) {
 
 void octosortTest(VAR *a, size_t n, size_t b) {
 	VAR *s = malloc(b * sizeof(VAR));
-	octosort32(a, n, s, b, cmp_int0);
+	octosort64(a, n, s, b, cmp);
 	free(s);
 }
 
 void blitsortTest(VAR *a, size_t n, size_t b) {
-	blitsort32(a, n, cmp_int0);
+	blitsort64(a, n, cmp);
 }
 
 //sort trial
@@ -206,7 +215,7 @@ void sortTrialsN(long long *times, void (*sorts[])(VAR*, size_t, size_t), char *
 
 void printA(VAR *data_arr, size_t data_length) {
     while(data_length--) {
-        printf("%d,", *data_arr);
+        printf("%lld,", *data_arr);
         *data_arr++;
     }
     printf("\n");
@@ -237,9 +246,9 @@ int main() {
 	VAR *a = malloc(n * sizeof(VAR));
 	
 	size_t trials = 100;
-	void (*sorts[])(VAR*, size_t, size_t) = {logSort, blitsortTest, sqrtsortTest, octosortTest, grailsortTest, logSort};
+	void (*sorts[])(VAR*, size_t, size_t) = {logSort, blitsortTest, sqrtsortTest, octosortTest, grailsortTest, qsortTest, logSort};
 	size_t sortCount = LEN(sorts);
-	char *sortNames[] = {"", "Blitsort (512)", "Sqrtsort (\u221AN)", "Octosort (512)", "Grailsort (512)", "Logsort (24)"}; 
+	char *sortNames[] = {"", "Blitsort (512)", "Sqrtsort (\u221AN)", "Octosort (512)", "Grailsort (512)", "qsort", "Logsort (512)"}; 
 	long long times[2];
 	
 	/*size_t bList[] = {512, 512, 512, 512, 24, 24, 24};
@@ -254,9 +263,9 @@ int main() {
 	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 7,  trials);
 	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 0,  trials);
 	
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 21, b, 19, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 21, b, 11, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 21, b, 0,  trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 20, b, 18, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 20, b, 10, trials);
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 20, b, 0,  trials);
 	
 	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 22, trials);
 	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 14, trials);
