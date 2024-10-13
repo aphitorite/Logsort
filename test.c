@@ -81,8 +81,9 @@ __attribute__ ((noinline)) int cmp(const void * a, const void * b)
 #define VAR long long
 #define CMP cmp //(a,b) (*(a) - *(b))
 
-#include "logsort.h"
 #include "algos/heliumSort.h"
+
+#include "logsort.h"
 
 //array generation
 
