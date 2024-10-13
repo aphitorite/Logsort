@@ -61,19 +61,28 @@ __attribute__ ((noinline)) int cmp(const void * a, const void * b)
 #define SORT_TYPE long long
 #define SORT_CMP cmp //(a,b) (*(a) - *(b))
 
-#include "GrailSort.h"
-#include "SqrtSort.h"
+#include "algos/GrailSort.h"
+#include "algos/SqrtSort.h"
 
 #undef SORT_TYPE
 #undef SORT_CMP
 
-#include "blitsort.h"
-#include "octosort.h"
+#define ELEMENT long long
+#define CMP cmp
+
+#include "algos/shelfsort.h"
+
+#undef CMP
+#undef ELEMENT
+
+#include "algos/blitsort.h"
+#include "algos/octosort.h"
 
 #define VAR long long
 #define CMP cmp //(a,b) (*(a) - *(b))
 
 #include "logsort.h"
+#include "algos/heliumSort.h"
 
 //array generation
 
@@ -108,8 +117,16 @@ void grailsortTest(VAR *a, size_t n, size_t b) {
 	free(s);
 }
 
+void heliumSortTest(VAR *a, size_t n, size_t b) {
+	heliumSort(a, 0, n, b);
+}
+
 void sqrtsortTest(VAR *a, size_t n, size_t b) {
 	SqrtSort(a, n);
+}
+
+void shelfsortTest(VAR *a, size_t n, size_t b) {
+	ShelfSort(a, n);
 }
 
 void octosortTest(VAR *a, size_t n, size_t b) {
@@ -132,6 +149,9 @@ void sortTrial(long long *times, void (*sort)(VAR*, size_t, size_t), VAR *a, siz
 	long long start, end, res;
 	
 	for(size_t i = 0; i < trials; i++) {
+		printf("\r(%ld/%ld) ", i+1, trials);
+		fflush(stdout);
+
 		randArray(a, n, sh);
 		
 		start = utime();
@@ -146,6 +166,7 @@ void sortTrial(long long *times, void (*sort)(VAR*, size_t, size_t), VAR *a, siz
 		best = res < best ? res : best;
 		avg += res;
 	}
+	printf("\r");
 	times[0] = best; 
 	times[1] = (long long)(avg / trials + 0.5);
 }
@@ -243,12 +264,12 @@ void printABars(VAR *a, size_t n) {
 
 int main() {
 	size_t n = 1 << 24, b = 512;
-	VAR *a = malloc(n * sizeof(VAR));
+	VAR *a = (VAR*) malloc(n * sizeof(VAR));
 	
 	size_t trials = 100;
-	void (*sorts[])(VAR*, size_t, size_t) = {logSort, blitsortTest, sqrtsortTest, octosortTest, grailsortTest, qsortTest, logSort};
+	void (*sorts[])(VAR*, size_t, size_t) = {logSort, blitsortTest, sqrtsortTest, octosortTest, heliumSortTest, grailsortTest, qsortTest, logSort};
 	size_t sortCount = LEN(sorts);
-	char *sortNames[] = {"", "Blitsort (512)", "Sqrtsort (\u221AN)", "Octosort (512)", "Grailsort (512)", "qsort", "Logsort (512)"}; 
+	char *sortNames[] = {"", "Blitsort (512)", "Sqrtsort (\u221AN)", "Octosort (512)", "Helium Sort (512)", "Grailsort (512)", "qsort", "Logsort (512)"}; 
 	long long times[2];
 	
 	/*size_t bList[] = {512, 512, 512, 512, 24, 24, 24};
