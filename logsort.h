@@ -23,50 +23,114 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  *
  */
+ 
+#ifndef LOGSORT_H
+#define LOGSORT_H
 
 #include <stdlib.h>
 #include <string.h>
 
-#define MIN_INSERT 64
+#define MIN_SMALLSORT 7
+#define MIN_PIPOSORT 512
 
-char ceilLog(size_t n) {
+char log_ceil_log(size_t n) {
 	char r = 0;
 	while((1 << r) < n) r++;
 	return r;
 }
 
-//fully unguarded insertion (assumes a[-1] is <= a[0] to a[n-1])
-void unguardedInsert(VAR *a, size_t n) {
-	VAR t, *pb, *pa;
-	size_t i;
-	
-	for(i = 1; i < n; i++) {
-		pb = a+i; pa = pb-1;
+////////////////
+//            //
+//  PIPOSORT  //
+//            //
+////////////////
+
+// courtesy of @scandum's piposort
+
+void log_smallsort(VAR *array, size_t nmemb)
+{
+	VAR swap, *pta, *pte;
+	unsigned char w = 1, x, y, z = 1;
+
+	switch (nmemb) {
+	default:
+		pte = array + nmemb - 3;
 		
-		if(CMP(pa, pb) <= 0) continue;
+		do {
+			pta = pte + (z = !z);
+
+			do {
+				x = cmp(pta, pta + 1) > 0; y = !x; 
+				swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; 
+				pta -= 2; w |= x;
+			}
+			while(pta >= array);
+		}
+		while(w-- && --nmemb);
+		return;
 		
-		t = *pb;
-		do { *(pb--) = *(pa--); } while(CMP(pa, &t) > 0);
-		*pb = t;
+	case 3:
+		pta = array;
+		
+		x = cmp(pta, pta + 1) > 0; y = !x; 
+		swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta++;
+		
+		x = cmp(pta, pta + 1) > 0; y = !x; 
+		swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
+		
+		if(x == 0) return;
+		
+	case 2:
+		pta = array;
+		
+		x = cmp(pta, pta + 1) > 0; y = !x; 
+		swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
+		
+	case 1:
+	case 0:
+		return;
 	}
 }
 
-void smallSort(VAR *a, size_t n) {
-	VAR t, *pb = a+n, *pa = pb-1;
-	size_t i;
-	
-	for(i = 1; i < n; i++)   //bubble smallest element to front
-		if(CMP(--pa, --pb) > 0) { t = *pa; *pa = *pb; *pb = t; }
-	
-	for(i = 1; i < n; i++) { //perform unguarded insertion
-		pb = a+i; pa = pb-1;
-		
-		if(CMP(pa, pb) <= 0) continue;
-		
-		t = *pb;
-		do { *(pb--) = *(pa--); } while(CMP(pa, &t) > 0);
-		*pb = t;
+void log_parity_merge(VAR *from, VAR *dest, size_t left, size_t right) {
+	VAR *ptl, *ptr, *tpl, *tpr, *tpd, *ptd;
+	unsigned char x;
+
+	ptl = from; ptr = from + left; ptd = dest;
+	tpl = from + left-1; tpr = from + left+right-1; tpd = dest + left+right-1;
+
+	if(left < right) *ptd++ = CMP(ptl, ptr) <= 0 ? *ptl++ : *ptr++;
+
+	while(--left) {
+		x = CMP(ptl, ptr) <= 0; *ptd = *ptl; ptl += x; ptd[x] = *ptr; ptr += !x; ptd++;
+		x = CMP(tpl, tpr) <= 0; *tpd = *tpl; tpl -= !x; tpd--; tpd[x] = *tpr; tpr -= x;
 	}
+	*tpd = CMP(tpl, tpr)  > 0 ? *tpl : *tpr;
+	*ptd = CMP(ptl, ptr) <= 0 ? *ptl : *ptr;
+}
+void log_piposort(VAR *array, VAR *swap, size_t n) {
+	size_t q1, q2, q3, q4, h1, h2;
+
+	if(n <= MIN_SMALLSORT) {
+		log_smallsort(array, n);
+		return;
+	}
+	h1 = n/2;  q1 = h1/2; q2 = h1-q1;
+	h2 = n-h1; q3 = h2/2; q4 = h2-q3;
+
+	log_piposort(array, swap, q1);
+	log_piposort(array + q1, swap, q2);
+	log_piposort(array + h1, swap, q3);
+	log_piposort(array + h1 + q3, swap, q4);
+
+	if(CMP(array + q1-1, array + q1) <= 0 && 
+	   CMP(array + h1-1, array + h1) <= 0 && 
+	   CMP(array + h1+q3-1, array + h1+q3) <= 0)
+		return;
+
+	log_parity_merge(array, swap, q1, q2);
+	log_parity_merge(array + h1, swap + h1, q3, q4);
+	log_parity_merge(swap, array, h1, h2);
 }
 
 ///////////////////////
@@ -75,58 +139,63 @@ void smallSort(VAR *a, size_t n) {
 //                   //
 ///////////////////////
 
-void quickSelect(VAR *a, size_t n, size_t p) {
-	VAR t, *i, *j;
-	size_t m;
-	
-	while(n > 32) {
-		i = a + n/2; j = a + n-1;
-		
-		if(CMP(i, a) > 0) { t = *i; *i = *a; *a = t; }
-		if(CMP(a, j) > 0) { t = *j; *j = *a; *a = t; }
-		if(CMP(i, a) > 0) { t = *i; *i = *a; *a = t; }
-		
-		i = a; j++;
-		
-		while(1) {
-			while(++i <  j && CMP(a, i) > 0);
-			while(--j >= i && CMP(j, a) > 0);
-			
-			if(i < j) { t = *i; *i = *j; *j = t; }
-			else      { t = *a; *a = *j; *j = t; break; }
-		}
-		m = j-a;
-		
-		if(p < m) n = m;
-		else if(p > m) { n -= m+1; p -= m+1; a = j+1; }
-		else return;
-	}
-	smallSort(a, n);
+// courtesy of @scandum's blitsort
+
+void log_trim_four(VAR *pta) {
+	VAR swap;
+	size_t x;
+
+	x = cmp(pta, pta + 1)  > 0; swap = pta[!x]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
+	x = cmp(pta, pta + 1)  > 0; swap = pta[!x]; pta[0] = pta[x]; pta[1] = swap; pta -= 2;
+
+	x = (cmp(pta, pta + 2) <= 0) * 2; pta[2] = pta[x]; pta++;
+	x = (cmp(pta, pta + 2)  > 0) * 2; pta[0] = pta[x];
 }
 
-VAR medianOfNine(VAR *a, VAR *s, size_t n) {
+VAR log_median_of_nine(VAR *a, VAR *s, size_t n) {
 	size_t step = (n-1) / 8, i;
 	VAR *pa = a;
 	
 	for(i = 0; i < 9; i++) 
 		{ s[i] = *pa; pa += step; }
 	
-	smallSort(s, 9);
+	log_smallsort(s, 9);
 	return s[4];
 }
-VAR smartMedian(VAR *a, VAR *s, size_t n, size_t bLen) {
+
+VAR log_smart_median(VAR *array, VAR *swap, size_t n, size_t bLen) {
+	if(bLen < 64) return log_median_of_nine(array, swap, n);
+	
 	size_t cbrt;
 	for(cbrt = 32; cbrt*cbrt*cbrt < n && cbrt < 1024; cbrt *= 2) {}
 	
-	size_t div = bLen < cbrt ? bLen : cbrt; div -= div % 2;
-	size_t step = n / div, i;
-	VAR *pa = a;
+	size_t div = bLen < cbrt ? bLen : cbrt;
+	size_t step = n/div, c;
+	VAR *i = array, *j;
 	
-	for(i = 0; i < div; i++) 
-		{ s[i] = *pa; pa += step; }
+	// copy sample to swap space
 	
-	quickSelect(s, div, div/2);
-	return s[div/2];
+	for(c = 0; c < div; c++) 
+		{ swap[c] = *i; i += step; }
+	
+	// halve the sample using trim fours
+	
+	div /= 2; i = swap; j = swap + div;
+	
+	for(c = (div /= 4); c; c--) {
+		log_trim_four(i);
+		log_trim_four(j);
+		
+		i[0] = j[1]; i[3] = j[2];
+		i += 4; j += 4;
+	}
+	
+	// sort sample for median
+	
+	div *= 4;
+	log_piposort(swap, swap+div, div);
+	
+	return swap[div/2 + 1];
 }
 
 ///////////////
@@ -135,7 +204,7 @@ VAR smartMedian(VAR *a, VAR *s, size_t n, size_t bLen) {
 //           //
 ///////////////
 
-void blockXor(VAR *a, VAR *b, size_t v) {
+void log_block_xor(VAR *a, VAR *b, size_t v) {
 	VAR t;
 	
 	while(v) {
@@ -144,7 +213,7 @@ void blockXor(VAR *a, VAR *b, size_t v) {
 	}
 }
 
-#define PIVFUNC(NAME) NAME##Less
+#define PIVFUNC(NAME) NAME##_less
 #define PIVCMP(a, b) (CMP((b), (a)) > 0)
 
 #include "logPartition.c"
@@ -152,7 +221,7 @@ void blockXor(VAR *a, VAR *b, size_t v) {
 #undef PIVFUNC
 #undef PIVCMP
 
-#define PIVFUNC(NAME) NAME##LessEq
+#define PIVFUNC(NAME) NAME##_less_eq
 #define PIVCMP(a, b) (CMP((a), (b)) <= 0)
 
 #include "logPartition.c"
@@ -160,55 +229,39 @@ void blockXor(VAR *a, VAR *b, size_t v) {
 #undef PIVFUNC
 #undef PIVCMP
 
-//not a full sort: use logSortMain() instead
-void logSortUnguarded(VAR *a, VAR *s, size_t n, size_t bLen) {
-	while(n > MIN_INSERT) {
-		VAR piv = n < 2048 ? medianOfNine(a, s, n)
-		                   : smartMedian(a, s, n, bLen);
+// logsort sorting functions
+
+void logsort_rec(VAR *a, VAR *s, size_t n, size_t bLen) {
+	size_t minSort = bLen < MIN_PIPOSORT ? bLen : MIN_PIPOSORT;
+	
+	while(n > minSort) {
+		VAR piv = n < 2048 ? log_median_of_nine(a, s, n)
+		                   : log_smart_median(a, s, n, bLen);
 		
-		VAR *p = partitionLessEq(a, s, n, bLen, &piv);
+		VAR *p = log_partition_less_eq(a, s, n, bLen, &piv);
 		size_t m = p-a;
 		
-		if(m == n) {
-			p = partitionLess(a, s, n, bLen, &piv);
+		if(m == n) { // in the case of many equal elements
+			p = log_partition_less(a, s, n, bLen, &piv);
 			n = p-a;
 			
 			continue;
 		}
-		logSortUnguarded(p, s, n-m, bLen);
+		logsort_rec(p, s, n-m, bLen);
 		n = m;
 	}
-	unguardedInsert(a, n);
+	log_piposort(a, s, n);
 }
-
-//logsort sorting functions
-
-void logSortMain(VAR *a, VAR *s, size_t n, size_t bLen) {
-	while(n > MIN_INSERT) {
-		VAR piv = n < 2048 ? medianOfNine(a, s, n)
-		                   : smartMedian(a, s, n, bLen);
-		
-		VAR *p = partitionLessEq(a, s, n, bLen, &piv);
-		size_t m = p-a;
-		
-		if(m == n) {
-			p = partitionLess(a, s, n, bLen, &piv);
-			n = p-a;
-			
-			continue;
-		}
-		logSortUnguarded(p, s, n-m, bLen);
-		n = m;
-	}
-	smallSort(a, n);
-}
-void logSort(VAR *a, size_t n, size_t bLen) {
+void logsort(VAR *a, size_t n, size_t bLen) {
 	if(n < bLen) bLen = n;
-	if(bLen < 9) bLen = 9; //for median of nine
+	if(bLen < 9) bLen = 9; // for median of nine
 	
 	VAR *s = malloc(bLen * sizeof(VAR));
-	logSortMain(a, s, n, bLen);
+	logsort_rec(a, s, n, bLen);
 	free(s);
 }
 
-#undef MIN_INSERT
+#undef MIN_SMALLSORT
+#undef MIN_PIPOSORT
+
+#endif // LOGSORT_H

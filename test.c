@@ -32,11 +32,13 @@ SOFTWARE.
 #include <errno.h>
 #include <math.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #define SEED 0
 #define LEN(A) (sizeof(A) / sizeof(*A))
+#define USE_AVG_TIME 1
 
-#define VAR_TYPE long long
+#define VAR_TYPE int
 
 long long utime()
 {
@@ -47,7 +49,7 @@ long long utime()
 	return now_time.tv_sec * 1000000LL + now_time.tv_usec;
 }
 
-//benching against qsort: no inline
+// benching against qsort: no inline
 
 __attribute__ ((noinline)) int cmp(const void * a, const void * b)
 {
@@ -57,9 +59,47 @@ __attribute__ ((noinline)) int cmp(const void * a, const void * b)
 	return fa - fb;
 }
 
-//import sorts
+// import different sorts
 
-#include <stdbool.h>
+void qsortTest(VAR_TYPE *a, size_t n, size_t b) {
+	qsort(a, n, sizeof(*a), cmp);
+}
+
+void shellsort(VAR_TYPE *array, size_t N, size_t b) {
+	VAR_TYPE t;
+	size_t i, j, k;
+		
+	for(k = 730725073; k; k = k/4 - k/16) {
+		for(j = k; j < N; j++) {
+			t = array[j];
+			
+			for(i = j; i >= k && cmp(&array[i-k], &t) > 0; i -= k)
+				array[i] = array[i-k];
+			
+			array[i] = t;
+		}
+	}
+}
+
+
+#include "algos/blitsort.h"
+#include "algos/octosort.h"
+
+void octosortTest(VAR_TYPE *a, size_t n, size_t b) {
+	VAR_TYPE *s = malloc(b * sizeof(VAR_TYPE));
+	octosort32(a, n, s, b, cmp);
+	free(s);
+}
+
+void blitsortTest(VAR_TYPE *a, size_t n, size_t b) {
+	blitsort32(a, n, cmp);
+}
+
+void quadsortTest(VAR_TYPE *a, size_t n, size_t b) {
+	quadsort32(a, n, cmp);
+}
+
+
 #define SORT_TYPE VAR_TYPE
 #define SORT_CMP cmp //(a,b) (*(a) - *(b))
 
@@ -69,28 +109,62 @@ __attribute__ ((noinline)) int cmp(const void * a, const void * b)
 #undef SORT_TYPE
 #undef SORT_CMP
 
+void grailsortTest(VAR_TYPE *a, size_t n, size_t b) {
+	VAR_TYPE *s = malloc(b * sizeof(VAR_TYPE));
+	grail_commonSort(a, n, s, b);
+	free(s);
+}
 
-#define ELEMENT VAR_TYPE
-#define CMP cmp
-
-#include "algos/shelfsort.h"
-
-#undef CMP
-#undef ELEMENT
+void sqrtsortTest(VAR_TYPE *a, size_t n, size_t b) {
+	SqrtSort(a, n);
+}
 
 
-#include "algos/blitsort.h"
-#include "algos/octosort.h"
+#ifdef USE_SHELFSORT
+
+	#define ELEMENT VAR_TYPE
+	#define CMP cmp
+
+	#include "algos/shelfsort.h"
+
+	#undef CMP
+	#undef ELEMENT
+
+	void shelfsortTest(VAR_TYPE *a, size_t n, size_t b) {
+		ShelfSort(a, n);
+	}
+	
+#endif
 
 
 #define VAR VAR_TYPE
 #define CMP cmp //(a,b) (*(a) - *(b))
 
-#include "algos/heliumSort.h"
+#ifdef USE_HELIUMSORT
+
+	#include "algos/heliumSort.h"
+
+	void heliumSortTest(VAR_TYPE *a, size_t n, size_t b) {
+		heliumSort(a, 0, n, b);
+	}
+	
+#endif
+
+#ifdef USE_ECTASORT
+
+	#include "algos/ectasort.h"
+	
+	void ectasortTest(VAR_TYPE *a, size_t n, size_t b) {
+		ectasort(a, n);
+	}
+	
+#endif
+
 #include "logsort.h"
 
 #undef VAR
 #undef CMP
+
 
 //array generation
 
@@ -113,43 +187,9 @@ void backwards(VAR_TYPE *a, size_t n, size_t s) {
 	}
 }
 
-//test sorts
-
-void qsortTest(VAR_TYPE *a, size_t n, size_t b) {
-	qsort(a, n, sizeof(*a), cmp);
-}
-
-void grailsortTest(VAR_TYPE *a, size_t n, size_t b) {
-	VAR_TYPE *s = malloc(b * sizeof(VAR_TYPE));
-	grail_commonSort(a, n, s, b);
-	free(s);
-}
-
-void heliumSortTest(VAR_TYPE *a, size_t n, size_t b) {
-	heliumSort(a, 0, n, b);
-}
-
-void sqrtsortTest(VAR_TYPE *a, size_t n, size_t b) {
-	SqrtSort(a, n);
-}
-
-void shelfsortTest(VAR_TYPE *a, size_t n, size_t b) {
-	ShelfSort(a, n);
-}
-
-void octosortTest(VAR_TYPE *a, size_t n, size_t b) {
-	VAR_TYPE *s = malloc(b * sizeof(VAR_TYPE));
-	octosort64(a, n, s, b, cmp);
-	free(s);
-}
-
-void blitsortTest(VAR_TYPE *a, size_t n, size_t b) {
-	blitsort64(a, n, cmp);
-}
-
 //sort trial
 
-void sortTrial(long long *times, void (*sort)(VAR_TYPE*, size_t, size_t), VAR_TYPE *a, size_t n, size_t bLen, size_t sh, size_t trials) {
+void sortTrial(long long *times, void (*sort)(VAR_TYPE*, size_t, size_t), VAR_TYPE *a, size_t n, size_t bLen, size_t sh, size_t trials, char prog) {
 	srand(SEED);
 	
 	unsigned long long best = -1;
@@ -157,9 +197,10 @@ void sortTrial(long long *times, void (*sort)(VAR_TYPE*, size_t, size_t), VAR_TY
 	long long start, end, res;
 	
 	for(size_t i = 0; i < trials; i++) {
-		printf("\r(%ld/%ld) ", i+1, trials);
-		fflush(stdout);
-
+		if(prog) {
+			printf("\r(%ld/%ld) ", i+1, trials);
+			fflush(stdout);
+		}
 		randArray(a, n, sh);
 		
 		start = utime();
@@ -174,7 +215,8 @@ void sortTrial(long long *times, void (*sort)(VAR_TYPE*, size_t, size_t), VAR_TY
 		best = res < best ? res : best;
 		avg += res;
 	}
-	printf("\r");
+	if(prog) printf("\r");
+	
 	times[0] = best; 
 	times[1] = (long long)(avg / trials + 0.5);
 }
@@ -185,12 +227,19 @@ void sortTrials(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), ch
 	printf("Sort,List Size,Data Type,Best Time (\u00B5s),Avg. Time (\u00B5s),Trials,Distribution\n");
 	
 	for(size_t i = 0; i < sortCount; i++) {
-		sortTrial(times, sorts[i], a, n, bLen, sh, trials);
+		sortTrial(times, sorts[i], a, n, bLen, sh, trials, 1);
 		
 		if(i > 0) //sometimes the times are biased for the first sort 
 			printf("%s,%ld,%ld bytes,%lld,%lld,%ld,%ld unique\n", sortNames[i], n, sizeof(VAR_TYPE), times[0], times[1], trials, n >> sh);
 	}
 	printf("\n");
+}
+
+void sortTrialsTest(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), char *sortNames[], size_t sortCount, void (*shuffle)(VAR_TYPE*, size_t, size_t),
+                    VAR_TYPE *a, size_t bLen, size_t sh, size_t trials) {
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << sh, bLen, sh-2, trials); // 4 unique
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << sh, bLen, sh/2, trials); // sqrt unique
+	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << sh, bLen, 0,    trials); // all unique
 }
 
 void sortTrialsS(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), char *sortNames[], size_t sortCount, void (*shuffle)(VAR_TYPE*, size_t, size_t),
@@ -206,10 +255,11 @@ void sortTrialsS(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), c
 		size_t sh = shifts[j];
 		
 		for(size_t i = 0; i < sortCount; i++) {
-			sortTrial(times, sorts[i], a, n, bLen, sh, trials);
+			sortTrial(times, sorts[i], a, n, bLen, sh, trials, 0);
 			
-			if(i > 0) //sometimes the times are biased for the first sort 
-				printf(",%lld", times[1]);
+			if(i > 0) { //sometimes the times are biased for the first sort 
+				printf(",%.6lf", (double) times[USE_AVG_TIME] / n);
+			}
 		}
 		printf("\n");
 	}
@@ -218,7 +268,7 @@ void sortTrialsS(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), c
 void sortTrialsN(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), char *sortNames[], size_t sortCount, void (*shuffle)(VAR_TYPE*, size_t, size_t),
                 VAR_TYPE *a, size_t *nList, size_t nCnt, size_t *bList, size_t sh, size_t trials) {
 	
-	printf("Avg. Time (\u00B5s):");
+	printf("Avg.Time per Elem. (\u00B5s)");
 	for(size_t i = 1; i < sortCount; i++)
 		printf(",%s", sortNames[i]);
 	printf("\n");
@@ -229,10 +279,10 @@ void sortTrialsN(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), c
 		fflush(stdout);
 		
 		for(size_t i = 0; i < sortCount; i++) {
-			sortTrial(times, sorts[i], a, n, bList[i], sh, trials);
+			sortTrial(times, sorts[i], a, n, bList[i], sh, trials, 0);
 			
 			if(i > 0) { //sometimes the times are biased for the first sort 
-				printf(",%lld", times[1]);
+				printf(",%.6lf", (double) times[USE_AVG_TIME] / n);
 				fflush(stdout);
 			}
 		}
@@ -244,7 +294,7 @@ void sortTrialsN(long long *times, void (*sorts[])(VAR_TYPE*, size_t, size_t), c
 
 void printA(VAR_TYPE *data_arr, size_t data_length) {
     while(data_length--) {
-        printf("%lld,", *data_arr);
+        printf("%lld,", (long long) *data_arr);
         *data_arr++;
     }
     printf("\n");
@@ -274,50 +324,60 @@ int main() {
 	size_t n = 1 << 24, b = 512;
 	VAR_TYPE *a = (VAR_TYPE*) malloc(n * sizeof(VAR_TYPE));
 	
-	void (*sorts[])(VAR_TYPE*, size_t, size_t) = { logSort, 
+	/*void (*sorts[])(VAR_TYPE*, size_t, size_t) = { logsort, 
 		blitsortTest, 
-		//shelfsortTest, 
+		ectasortTest,
+		shelfsortTest, 
 		sqrtsortTest, 
 		octosortTest, 
 		heliumSortTest, 
 		grailsortTest, 
 		qsortTest, 
-		logSort
+		logsort
 	};
 	char *sortNames[] = { "", 
 		"Blitsort (512)", 
-		//"Shelfsort (\u221AN)",
+		"Ectasort (\u221AN)",
+		"Shelfsort (\u221AN)",
 		"Sqrtsort (\u221AN)", 
 		"Octosort (512)", 
 		"Helium Sort (512)", 
 		"Grailsort (512)", 
 		"qsort", 
 		"Logsort (512)"
-	}; 
+	};*/
+	
+	void (*sorts[])(VAR_TYPE*, size_t, size_t) = { logsort, 
+		blitsortTest,
+		sqrtsortTest, 
+		octosortTest, 
+		grailsortTest, 
+		logsort
+	};
+	char *sortNames[] = { "", 
+		"Blitsort (512)",
+		"Sqrtsort (\u221AN)", 
+		"Octosort (512)", 
+		"Grailsort (512)", 
+		"Logsort (512)"
+	};
 	
 	size_t trials = 100;
 	size_t sortCount = LEN(sorts);
 	long long times[2];
 	
-	/*size_t bList[] = {512, 512, 512, 512, 24, 24, 24};
-	size_t nList[] = {10000000, 1000000, 100000, 10000, 1000};
+	/*const size_t exp = 7;
+	size_t bList[] = {512, 512, 512, 512, 512, 512, 512, 512, 512, 512, 512, 512};
+	size_t nList[] = {1<<14, 1<<16, 1<<18, 1<<20, 1<<22, 1<<24};
 	size_t nCnt = LEN(nList);
 	
 	sortTrialsN(times, sorts, sortNames, sortCount, randArray, a, nList, nCnt, bList, 0, 100);*/
 	
 	printf("using buffer size %ld\n\n", b);
 	
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 12, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 7,  trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 14, b, 0,  trials);
-	
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 20, b, 18, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 20, b, 10, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 20, b, 0,  trials);
-	
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 22, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 14, trials);
-	sortTrials(times, sorts, sortNames, sortCount, randArray, a, 1 << 24, b, 0,  trials);
+	sortTrialsTest(times, sorts, sortNames, sortCount, randArray, a, b, 14, trials);
+	sortTrialsTest(times, sorts, sortNames, sortCount, randArray, a, b, 20, trials);
+	sortTrialsTest(times, sorts, sortNames, sortCount, randArray, a, b, 24, trials);
 	
 	free(a);
 	

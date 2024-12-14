@@ -24,7 +24,7 @@ SOFTWARE.
  *
  */
 
-size_t PIVFUNC(blockRead)(VAR *a, VAR *piv, char wLen) {
+size_t PIVFUNC(log_block_read)(VAR *a, VAR *piv, char wLen) {
 	size_t r = 0, i = 0;
 	
 	while(wLen--) r |= PIVCMP(a++, piv) << (i++);
@@ -32,44 +32,56 @@ size_t PIVFUNC(blockRead)(VAR *a, VAR *piv, char wLen) {
 	return r;
 }
 
-VAR *PIVFUNC(partitionEasy)(VAR *a, VAR *s, size_t n, VAR *piv) {
-	VAR *pa = a, *ps = s;
-	char x;
+VAR *PIVFUNC(log_partition_easy)(VAR *array, VAR *swap, size_t n, VAR *piv) {
+	size_t c, x, y;
+	VAR *a = array, *b = a+n-1, *i = a, *j = b;
+	VAR *swapEnd = swap+n, *pa = swap, *pb = swapEnd-1;
 	
-	for(size_t i = 0; i < n; i++) {
-		x = PIVCMP(pa, piv);
+	for(c = n/2; c; c--) {
+		x = PIVCMP(i, piv);
+		*a = *i; *pa = *i; i++; a += x; pa += !x;
 		
-		*a = *pa; *ps = *pa; pa++; a += x; ps += !x;
+		x = PIVCMP(j, piv);
+		*b = *j; *pb = *j; j--; b -= !x; pb -= x;
 	}
-	memcpy(a, s, (ps-s) * sizeof(VAR));
+	if(n % 2) {
+		x = PIVCMP(i, piv);
+		*a = *i; *pa = *i; i++; a += x; pa += !x;
+	}
+	while(++pb < swapEnd) *a++ = *pb;
+	while(pa-- > swap)    *b-- = *pa;
 	
 	return a;
 }
-VAR *PIVFUNC(partition)(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv) {
-	if(n <= bLen) return PIVFUNC(partitionEasy)(a, s, n, piv);
+VAR *PIVFUNC(log_partition)(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv) {
+	if(n <= bLen) return PIVFUNC(log_partition_easy)(a, s, n, piv);
 	
-	//group into blocks
+	// group into blocks
 	
-	VAR *p = a;
-	size_t i, l = 0, r = 0, lb = 0, rb = 0;
+	VAR *p;
+	size_t i, l = 0, r = 0, lb, rb = 0, rem;
 	char x;
-	
-	for(i = 0; i < n; i++) {
+
+	for(i = 0; i < n; i++) { // branchless partitioning from fluxsort
 		x = PIVCMP(a+i, piv);
+		a[l] = a[i]; s[r] = a[i];
+		l += x; r += !x;
 		
-		p[l] = a[i]; s[r] = a[i]; l += x; r += !x;
-		
-		if(l == bLen) { 
-			p += bLen; l = 0; lb++; 
-		}
-		if(r == bLen) {
-			memcpy(p+bLen, p, l * sizeof(VAR));
-			memcpy(p, s, bLen * sizeof(VAR));
+		if(r == bLen) { // external buffer full: empty block in main array
 			
-			p += bLen; r = 0; rb++;
+			rem = l % bLen; // size of 0's fragment
+			p = a+l - rem;
+			
+			memcpy(p+bLen, p, rem * sizeof(VAR)); // copy 0's fragment
+			memcpy(p, s, bLen * sizeof(VAR));     // copy 1's block in
+			
+			l += bLen; r = 0; rb++;
 		}
 	}
-	memcpy(p+l, s, r * sizeof(VAR));
+	p = a+l;
+	memcpy(p, s, r * sizeof(VAR));
+	l %= bLen; p -= l;
+	lb = (n-r)/bLen - rb;
 	
 	char left = lb < rb;
 	size_t min = left ? lb : rb;
@@ -77,9 +89,9 @@ VAR *PIVFUNC(partition)(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv) {
 	
 	if(min) {
 		size_t max = lb+rb - min, v = 0;
-		char wLen = ceilLog(min);
+		char wLen = log_ceil_log(min);
 		
-		//encode bits in blocks
+		// encode bits in blocks
 		
 		VAR *pa = a, *pb = a;
 		
@@ -87,11 +99,11 @@ VAR *PIVFUNC(partition)(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv) {
 			while(!PIVCMP(pa+wLen, piv)) pa += bLen;
 			while( PIVCMP(pb+wLen, piv)) pb += bLen;
 			
-			blockXor(pa, pb, v++); 
+			log_block_xor(pa, pb, v++); 
 			pa += bLen; pb += bLen;
 		}
 		
-		//swap blocks of larger partition
+		// swap blocks of larger partition
 		
 		pa = left ? p-bLen : a; pb = pa;
 		size_t step = left ? -bLen : bLen;
@@ -107,27 +119,27 @@ VAR *PIVFUNC(partition)(VAR *a, VAR *s, size_t n, size_t bLen, VAR *piv) {
 			pb += step;
 		}
 		
-		//block cycle sort
+		// block cycle sort
 		
 		size_t j, mask = (left << wLen) - left; v = 0;
 		VAR *ps = left ? a : m; pa = ps; pb = left ? m : a;
 		
 		for(i = 0; i < min; i++) {
-			j = mask ^ PIVFUNC(blockRead)(pa, piv, wLen);
+			j = mask ^ PIVFUNC(log_block_read)(pa, piv, wLen);
 			
 			while(j != v) {
 				memcpy(s,  pa,          bLen * sizeof(VAR));
 				memcpy(pa, ps + j*bLen, bLen * sizeof(VAR));
 				memcpy(ps + j*bLen,  s, bLen * sizeof(VAR));
 				
-				j = mask ^ PIVFUNC(blockRead)(pa, piv, wLen);
+				j = mask ^ PIVFUNC(log_block_read)(pa, piv, wLen);
 			}
-			blockXor(pa, pb, v++);
+			log_block_xor(pa, pb, v++);
 			pa += bLen; pb += bLen;
 		}
 	}
 	
-	//clean up leftovers
+	// clean up leftovers: shift 0's fragment in place
 	
 	memcpy(s, p, l * sizeof(VAR));
 	memmove(m+l, m, rb*bLen * sizeof(VAR));
