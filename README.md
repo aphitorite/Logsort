@@ -7,7 +7,8 @@ Logsort is a novel practical O(n log n) quicksort that is both in-place and stab
 
 To see Logsort's practical performance, jump to [Results](https://github.com/aphitorite/Logsort#Results).
 
-**Usage:** define `VAR` element type and `CMP` comparison function.
+> [!NOTE]
+> **Usage:** define `VAR` element type and `CMP` comparison function.
 
 ## Visualization
 
