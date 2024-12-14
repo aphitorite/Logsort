@@ -276,7 +276,7 @@ An O(n log n) in-place stable sort in theory sounds great, but how does it compa
 All sorts are compiled with `gcc -O3` using GCC 11.4.0 and ran on Ubuntu 22.04 using WSL.  The algorithms sort a random linear distribution of 32-bit integers containing N unique, √N unique, and 4 unique values respectively.  The average time among 100 trials is recorded.
 
 ![2^14](https://github.com/aphitorite/Logsort/blob/main/graphs/exp14.png)
-![2^20](https://github.com/aphitorite/Logsort/blob/main/graphs/exp21.png)
+![2^20](https://github.com/aphitorite/Logsort/blob/main/graphs/exp20.png)
 ![2^24](https://github.com/aphitorite/Logsort/blob/main/graphs/exp24.png)
 
 <details><summary>Data table</summary>
