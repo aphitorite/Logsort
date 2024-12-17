@@ -381,7 +381,7 @@ The author would like to thank members of the Discord server "The Studio" ([http
 
 ## References
 
-- **(Munro et al. 1990)** Stable in situ sorting and minimum data movement https://link.springer.com/article/10.1007/BF02017344
-- **(Anonymous0726 2021)** \[Seizure Warning\] Aeos Quicksort https://www.youtube.com/watch?v=_YTl2VJnQ4s
-- **(Katajainen & Pasanen 1992)** Stable minimum space partitioning in linear time https://link.springer.com/article/10.1007/BF02017344
-- **(Edelkamp & Weiss 2016)** BlockQuicksort: How Branch Mispredictions don't affect Quicksort
+- **(Munro et al. 1990)** Stable in situ sorting and minimum data movement (https://link.springer.com/article/10.1007/BF02017344) 
+- **(Anonymous0726 2021)** \[Seizure Warning\] Aeos Quicksort (https://www.youtube.com/watch?v=_YTl2VJnQ4s) 
+- **(Katajainen & Pasanen 1992)** Stable minimum space partitioning in linear time (https://link.springer.com/article/10.1007/BF02017344) 
+- **(Edelkamp & Weiss 2016)** BlockQuicksort: How Branch Mispredictions don't affect Quicksort (https://arxiv.org/abs/1604.06697)
