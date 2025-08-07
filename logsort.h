@@ -60,7 +60,7 @@ void log_smallsort(VAR *array, size_t nmemb)
 			pta = pte + (z = !z);
 
 			do {
-				x = cmp(pta, pta + 1) > 0; y = !x; 
+				x = CMP(pta, pta + 1) > 0; y = !x; 
 				swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; 
 				pta -= 2; w |= x;
 			}
@@ -72,10 +72,10 @@ void log_smallsort(VAR *array, size_t nmemb)
 	case 3:
 		pta = array;
 		
-		x = cmp(pta, pta + 1) > 0; y = !x; 
+		x = CMP(pta, pta + 1) > 0; y = !x; 
 		swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta++;
 		
-		x = cmp(pta, pta + 1) > 0; y = !x; 
+		x = CMP(pta, pta + 1) > 0; y = !x; 
 		swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
 		
 		if(x == 0) return;
@@ -83,7 +83,7 @@ void log_smallsort(VAR *array, size_t nmemb)
 	case 2:
 		pta = array;
 		
-		x = cmp(pta, pta + 1) > 0; y = !x; 
+		x = CMP(pta, pta + 1) > 0; y = !x; 
 		swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
 		
 	case 1:
@@ -145,11 +145,11 @@ void log_trim_four(VAR *pta) {
 	VAR swap;
 	size_t x;
 
-	x = cmp(pta, pta + 1)  > 0; swap = pta[!x]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
-	x = cmp(pta, pta + 1)  > 0; swap = pta[!x]; pta[0] = pta[x]; pta[1] = swap; pta -= 2;
+	x = CMP(pta, pta + 1)  > 0; swap = pta[!x]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
+	x = CMP(pta, pta + 1)  > 0; swap = pta[!x]; pta[0] = pta[x]; pta[1] = swap; pta -= 2;
 
-	x = (cmp(pta, pta + 2) <= 0) * 2; pta[2] = pta[x]; pta++;
-	x = (cmp(pta, pta + 2)  > 0) * 2; pta[0] = pta[x];
+	x = (CMP(pta, pta + 2) <= 0) * 2; pta[2] = pta[x]; pta++;
+	x = (CMP(pta, pta + 2)  > 0) * 2; pta[0] = pta[x];
 }
 
 VAR log_median_of_nine(VAR *a, VAR *s, size_t n) {
