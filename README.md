@@ -94,7 +94,7 @@ At the end of the phase, we are left with some leftover zeros that don't make a 
 
 Logsort's O(log n) space usage comes from grouping blocks of size O(log n), and this will be important in the encoding phase.  In the actual implementation, a space optimization from Aeos Quicksort is used which only needs one bucket instead of two. (Anonymous0726 2021)  Like Wikisort and Grailsort, Logsort's external buffer size can be configured, given it's at least Ω(log n).
 
-> Since each element is moved a constant amount of times, once to the bucket and once back to the array, the grouping phase is O(n) regardless of block size but requires O(block size) extra space.
+> Since each element is moved a constant number of times, once to the bucket and once back to the array, the grouping phase is O(n) regardless of block size but requires O(block size) extra space.
 
 ## Bit encoding
 
@@ -365,7 +365,7 @@ Being a stable quicksort, Logsort naturally performs well on data with few uniqu
 
 Logsort's main rival, Blitsort, is an optimized Rotate Merge/Quick Sort which uses rotations to merge/partition but has a suboptimal O(n log² n) complexity.  Despite this, Rotate Merge is known to beat the optimal Block Merge owing to its simplicity, good locality, and low overhead.
 
-In the benchmarks, Logsort remained competitive with Blitsort on 2^14 to 2^20 integers and even beat Blitsort on 2^24 integers and beyond with its superior time complexity.  Unlike Blitsort, however, Logsort is not optimized to be an adaptive sort, and this comparison is only on random data.  A hybrid between a rotate partition and blocked partition is also a good idea, but such an optimization is left to the reader.
+In the benchmarks, Logsort remained competitive with Blitsort on 2^14 to 2^20 integers and even beat Blitsort on 2^24 integers and beyond with its superior time complexity.  Unlike Blitsort, however, Logsort is not optimized to be an adaptive sort, and this comparison is only on random data.  A hybrid between a rotate partition and blocked partition is also a good idea, but such an optimization is left to the reader.  To keep the codebase as simple as possible, there is no fallback algorithm when choosing a bad pivot, so it is highly advised to include one when using this algorithm in a practical setting.
 
 With further improvements, it's likely that stable O(n log n) in-place sorting has practical application outside of theory.  It's worth noting that Logsort's application is quite galactic, only seeing noticeable benefits on lengths in the tens of millions.  However, despite Logsort's simplicity compared to Block Merge Sorts, these algorithms remain fairly complicated compared to their unstable counterparts.  
 
